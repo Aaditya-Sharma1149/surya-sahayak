@@ -8,7 +8,7 @@
   <a href="#architecture">Architecture</a> ·
   <a href="#run-it-yourself">Run it</a> ·
   <a href="docs/DEPLOY.md">Deploy on AWS</a>
-  <!-- add your video:  · <a href="https://youtu.be/XXXX"><b>3-minute demo video</b></a> -->
+  https://drive.google.com/file/d/1VtHqSm0Mt256ZdwBMFdORuuSrs5NmMhX/view
 </p>
 
 <p align="center">
@@ -304,15 +304,13 @@ The unit suite also runs on every push through GitHub Actions (`.github/workflow
 - The Open-Meteo free tier is for non-commercial use; a commercial launch would need their paid plan. Results are cached per ~1 km cell.
 - Next: more state top-ups once confirmed, bill history from multiple photos, vendor lists from the national portal.
 
-<!--
+
 ## Team
 
-| Name | Role |
-|---|---|
-| Your name | … |
-| Teammate 2 | … |
-| Teammate 3 | … |
--->
+ Name                  email
+Aaditya Sharma   aaditya.sharma.ug23@nsut.ac.in
+Pawan Poudel     pawan.poudel.ug24@nsut.ac.in
+Subham Yadav     subham.yadav.ug24@nust.ac.in
 
 ## Credits and license
 
