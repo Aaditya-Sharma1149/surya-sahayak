@@ -10,7 +10,7 @@
   <a href="docs/DEPLOY.md">Deploy on AWS</a>
   https://drive.google.com/file/d/1VtHqSm0Mt256ZdwBMFdORuuSrs5NmMhX/view
 </p>
-
+https://youtu.be/rZ3P_bCCZeM
 <p align="center">
   <img alt="Amazon Bedrock" src="https://img.shields.io/badge/Amazon%20Bedrock-Nova%20Lite%20%2B%20Pro-FF9900?logo=amazonaws&logoColor=white">
   <img alt="Strands Agents" src="https://img.shields.io/badge/Strands-Agents-232F3E">
