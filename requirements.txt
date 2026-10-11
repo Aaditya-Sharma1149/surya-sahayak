@@ -1,9 +1,0 @@
-boto3
-strands-agents
-fastapi
-uvicorn
-python-multipart
-requests
-pillow
-httpx
-pytest
