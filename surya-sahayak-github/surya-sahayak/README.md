@@ -80,6 +80,9 @@ Delhi add more. Yet most households never get past the first question, because n
   <img src="docs/screenshots/breakeven.png" alt="Break-even chart">
   <img src="docs/screenshots/quote-check.png" alt="Vendor quote check">
 -->
+<img width="1897" height="918" alt="Screenshot 2026-10-11 154732" src="https://github.com/user-attachments/assets/619d2b46-0abc-4d32-a4a0-548ac103da8b" />
+<img width="1870" height="812" alt="Screenshot 2026-10-11 154745" src="https://github.com/user-attachments/assets/42eae5e3-8ca4-4158-a293-00beb3d92371" />
+
 
 | Feature | What the user sees | How it's worked out |
 |---|---|---|
