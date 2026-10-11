@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="t d">
+  <title id="t">Surya Sahayak</title>
+  <desc id="d">Upload your electricity bill and see what rooftop solar saves you, in rupees.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0D1B2A"/><stop offset="1" stop-color="#142B3B"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#F4B942" stop-opacity=".55"/><stop offset=".5" stop-color="#F4B942" stop-opacity=".16"/><stop offset="1" stop-color="#F4B942" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#FCFBF8" stroke-opacity=".05"/></pattern>
+    <linearGradient id="fade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="1"/></linearGradient>
+    <mask id="m"><rect width="1280" height="320" fill="url(#fade)"/></mask>
+  </defs>
+  <rect width="1280" height="320" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="320" rx="18" fill="url(#grid)" mask="url(#m)"/>
+  <circle cx="1090" cy="40" r="300" fill="url(#glow)"/>
+  <circle cx="1090" cy="96" r="44" fill="#F7C65A"/>
+  <g fill="none" stroke="#F4B942" stroke-opacity=".25">
+    <path d="M0 280C220 220 420 300 640 250S1040 160 1280 200"/>
+    <path d="M0 305C240 250 440 320 660 275S1060 195 1280 230" stroke-opacity=".15"/>
+  </g>
+  <!-- panels -->
+  <g transform="translate(905 170)">
+    <g fill="#163452" stroke="#6F8FAE" stroke-width="1.4">
+      <path d="M0 80l16-56h74l-16 56z"/><path d="M84 80l16-56h74l-16 56z"/><path d="M168 80l16-56h74l-16 56z"/>
+    </g>
+    <g stroke="#2F5577" stroke-width="1"><path d="M8 52h82M92 52h82M176 52h82M41 24l-16 56M66 24l-16 56M125 24l-16 56M150 24l-16 56M209 24l-16 56M234 24l-16 56"/></g>
+    <path d="M10 80v26M80 80v26M94 80v26M164 80v26M178 80v26M248 80v26" stroke="#7E95AA" stroke-width="3"/>
+    <rect x="-12" y="104" width="284" height="10" rx="2" fill="#2C4C66"/>
+  </g>
+  <!-- logo + words -->
+  <g transform="translate(64 70)">
+    <circle cx="40" cy="22" r="13" fill="#F4B942"/>
+    <g stroke="#F4B942" stroke-width="3" stroke-linecap="round"><path d="M40 0v4M62 22h-4M55 7l-3 3M25 7l3 3"/></g>
+    <path d="M6 66l11-24h38l11 24z" fill="#FCFBF8"/>
+    <path d="M24 42l-5 24M48 42l5 24M11 54h50" stroke="#0D1B2A" stroke-width="2.4"/>
+  </g>
+  <text x="156" y="118" fill="#FCFBF8" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="54" font-weight="700" letter-spacing="-1.5">Surya Sahayak</text>
+  <text x="158" y="150" fill="#F4B942" font-family="'Noto Sans Devanagari', Mukta, Nirmala UI, 'Segoe UI', sans-serif" font-size="22" font-weight="600">सूर्य सहायक · Your roof, in rupees</text>
+  <text x="64" y="208" fill="#FCFBF8" fill-opacity=".86" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24">Upload one electricity bill. See the savings, the subsidy and the payback,</text>
+  <text x="64" y="240" fill="#FCFBF8" fill-opacity=".86" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24">worked out from five years of real weather over your roof.</text>
+  <g font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600">
+    <rect x="64" y="266" width="196" height="30" rx="15" fill="#F4B942"/><text x="162" y="286" fill="#0D1B2A" text-anchor="middle">Amazon Bedrock · Nova</text>
+    <rect x="272" y="266" width="150" height="30" rx="15" fill="none" stroke="#FCFBF8" stroke-opacity=".35"/><text x="347" y="286" fill="#FCFBF8" text-anchor="middle">Strands Agents</text>
+    <rect x="434" y="266" width="196" height="30" rx="15" fill="none" stroke="#FCFBF8" stroke-opacity=".35"/><text x="532" y="286" fill="#FCFBF8" text-anchor="middle">5 yrs real weather</text>
+    <rect x="642" y="266" width="160" height="30" rx="15" fill="none" stroke="#FCFBF8" stroke-opacity=".35"/><text x="722" y="286" fill="#FCFBF8" text-anchor="middle">English · हिंदी</text>
+  </g>
+</svg>

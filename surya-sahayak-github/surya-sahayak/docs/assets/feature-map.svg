@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="t d">
+<title id="t">Surya Sahayak feature map</title>
+<desc id="d">One electricity bill goes in; Surya Sahayak reads it, finds the roof, replays five years of weather and does the maths; ten features come out.</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#C9962B"/></marker>
+<radialGradient id="g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F4B942" stop-opacity=".45"/><stop offset="1" stop-color="#F4B942" stop-opacity="0"/></radialGradient></defs>
+<rect width="1280" height="760" rx="20" fill="#FCFBF8"/>
+<text x="40" y="58" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#172B3A">One upload in, a full rooftop-solar plan out</text>
+<text x="40" y="88" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#5E6D79">Everything on the right comes from a single electricity bill. Nothing to fill in unless the bill is unreadable.</text>
+<rect x="40" y="140" width="250" height="300" rx="16" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<text x="64" y="176" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#8A5A00">You give</text>
+<g transform="translate(64 196)"><rect width="74" height="96" rx="8" fill="#FBF0D6" stroke="#E3C27A"/><path d="M14 22h46M14 36h46M14 50h30M14 70h46" stroke="#C9962B" stroke-width="4" stroke-linecap="round"/><circle cx="58" cy="82" r="14" fill="#F4B942"/><path d="M58 89v-14M52 81l6-6 6 6" stroke="#0D1B2A" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="64" y="324" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#172B3A">Electricity bill</text>
+<text x="64" y="348" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#5E6D79">Photo or PDF, up to 10 MB</text>
+<line x1="64" y1="368" x2="266" y2="368" stroke="#E4E8EB"/>
+<text x="64" y="394" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#5E6D79">Optional: GPS location</text>
+<text x="64" y="418" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#5E6D79">No bill? Type units + city</text>
+<path d="M296 290H346" stroke="#C9962B" stroke-width="3" marker-end="url(#ar)"/>
+<rect x="356" y="120" width="300" height="470" rx="18" fill="#142B3B"/>
+<clipPath id="ec"><rect x="356" y="120" width="300" height="470" rx="18"/></clipPath><circle cx="626" cy="140" r="120" fill="url(#g)" clip-path="url(#ec)"/>
+<text x="380" y="164" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#FCFBF8">Surya Sahayak</text>
+<text x="380" y="188" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#F4B942">four steps, shown live on screen</text>
+<circle cx="394" cy="228" r="15" fill="#F4B942"/>
+<text x="394" y="234" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0D1B2A">1</text>
+<text x="420" y="226" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#FCFBF8">Read the bill</text>
+<text x="420" y="248" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">Amazon Bedrock Nova Lite</text>
+<text x="420" y="267" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">units, load, discom, PIN</text>
+<path d="M394 246V294" stroke="#F4B942" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="394" cy="316" r="15" fill="#F4B942"/>
+<text x="394" y="322" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0D1B2A">2</text>
+<text x="420" y="314" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#FCFBF8">Find the roof</text>
+<text x="420" y="336" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">GPS, else PIN on the bill,</text>
+<text x="420" y="355" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">else network, else state</text>
+<path d="M394 334V382" stroke="#F4B942" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="394" cy="404" r="15" fill="#F4B942"/>
+<text x="394" y="410" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0D1B2A">3</text>
+<text x="420" y="402" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#FCFBF8">Replay 5 years of weather</text>
+<text x="420" y="424" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">Open-Meteo ERA5, hourly,</text>
+<text x="420" y="443" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">anchored to PVGIS</text>
+<path d="M394 422V470" stroke="#F4B942" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="394" cy="492" r="15" fill="#F4B942"/>
+<text x="394" y="498" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0D1B2A">4</text>
+<text x="420" y="490" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#FCFBF8">Do the maths in Python</text>
+<text x="420" y="512" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">subsidy, tariff slabs, loan,</text>
+<text x="420" y="531" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#FCFBF8" fill-opacity=".75">25-year cash flow</text>
+<rect x="712" y="120" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="712" y="134" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="732" y="154" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Estimated savings</text>
+<text x="732" y="178" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">₹ a year, rounded, subsidies stated</text>
+<rect x="986" y="120" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="986" y="134" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="1006" y="154" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Subsidy stack</text>
+<text x="1006" y="178" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Central PM Surya Ghar + state, dated</text>
+<rect x="712" y="217" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="712" y="231" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="732" y="251" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Payback and break-even</text>
+<text x="732" y="275" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">25-year cash flow, two tariff cases</text>
+<rect x="986" y="217" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="986" y="231" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="1006" y="251" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Last 5 years, replayed</text>
+<text x="1006" y="275" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">What your roof would have earned</text>
+<rect x="712" y="314" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="712" y="328" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="732" y="348" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Every panel in rupees</text>
+<text x="732" y="372" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Per panel, per kW, per m², size ladder</text>
+<rect x="986" y="314" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="986" y="328" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="1006" y="348" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Pollution avoided</text>
+<text x="1006" y="372" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Coal, CO₂, SO₂, NOx, PM2.5, ash, water</text>
+<rect x="712" y="411" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="712" y="425" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="732" y="445" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Vendor quote check</text>
+<text x="732" y="469" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Price vs market, subsidy red flags</text>
+<rect x="986" y="411" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="986" y="425" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="1006" y="445" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Roof fit check</text>
+<text x="1006" y="469" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Satellite map: tap the roof corners</text>
+<rect x="712" y="508" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="712" y="522" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="732" y="542" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Ask in Hindi or English</text>
+<text x="732" y="566" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Nova Pro + Strands Agents</text>
+<rect x="986" y="508" width="256" height="82" rx="12" fill="#fff" stroke="#E4E8EB" stroke-width="1.5"/>
+<rect x="986" y="522" width="4" height="54" rx="2" fill="#F4B942"/>
+<text x="1006" y="542" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">Check before you pay</text>
+<text x="1006" y="566" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#5E6D79">Vendor, DCR panels, survey, net meter</text>
+<path d="M660 355C686 355 678 161 704 161" fill="none" stroke="#C9962B" stroke-opacity=".55" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M660 355C686 355 678 258 704 258" fill="none" stroke="#C9962B" stroke-opacity=".55" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M660 355C686 355 678 355 704 355" fill="none" stroke="#C9962B" stroke-opacity=".55" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M660 355C686 355 678 452 704 452" fill="none" stroke="#C9962B" stroke-opacity=".55" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M660 355C686 355 678 549 704 549" fill="none" stroke="#C9962B" stroke-opacity=".55" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="40" y="636" width="1200" height="84" rx="14" fill="#F7F2E8"/>
+<text x="64" y="671" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#172B3A">The rule we built around</text>
+<text x="64" y="698" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#5E6D79">The AI only reads the bill and explains the result. Every number is computed by plain, tested Python. Anything unclear is asked, never guessed.</text>
+</svg>

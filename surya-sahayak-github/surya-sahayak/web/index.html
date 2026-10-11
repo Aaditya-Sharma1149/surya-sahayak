@@ -1,0 +1,1834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surya Sahayak</title>
+<meta name="description" content="Upload your electricity bill to see what rooftop solar could save you, what the subsidy covers and roughly when it pays for itself, worked out from five years of real weather over your roof.">
+<meta name="theme-color" content="#0D1B2A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* =====================================================================================
+   Surya Sahayak: navy + solar gold on warm white. One dark hero, everything else light.
+   ===================================================================================== */
+:root{
+  --navy:#142B3B; --deep:#0D1B2A; --gold:#F4B942; --gold-ink:#8A5A00; --gold-soft:#FBF0D6;
+  --white:#FCFBF8; --cream:#F7F2E8; --green:#287A55; --green-soft:#E6F2EB;
+  --ink:#172B3A; --ink2:#5E6D79; --line:#E4E8EB; --line2:#D5DCE1;
+  --risk:#B42318; --risk-soft:#FDECEA; --warn:#7A4A00; --warn-soft:#FDF3E1; --info-soft:#EDF2F6;
+  --on-dark:#FCFBF8; --on-dark2:rgba(252,251,248,.78);
+  --r:14px; --r-sm:10px; --r-lg:20px;
+  --shadow:0 1px 2px rgba(13,27,42,.06), 0 8px 24px -12px rgba(13,27,42,.18);
+  --font:"Inter","Mukta",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --fs:clamp(15px,.35vw + 14px,16.5px);
+}
+*{box-sizing:border-box}
+html{font-size:var(--fs);scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-feature-settings:"cv11","ss01"}
+:lang(hi) body, body:lang(hi){line-height:1.68}
+a{color:inherit;text-underline-offset:3px}
+h1,h2,h3{letter-spacing:-.02em;line-height:1.15;margin:0}
+p{margin:0}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+.tnum{font-variant-numeric:tabular-nums}
+.hidden{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+#top,#progress,#needs,#report,#manualBox,#how{scroll-margin-top:76px}
+
+/* ---------------------------------------------------------------- header */
+header{position:sticky;top:0;z-index:40;background:rgba(13,27,42,.94);backdrop-filter:blur(10px);color:var(--on-dark);border-bottom:1px solid rgba(255,255,255,.07)}
+header .hbar{max-width:1180px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.brand b{font-weight:700;font-size:1.06rem;letter-spacing:-.01em;display:block}
+.brand small{display:block;font-size:.76rem;color:var(--on-dark2);margin-top:-1px}
+.lang{display:inline-flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.lang button{border:0;background:transparent;color:var(--on-dark2);font:inherit;font-weight:600;font-size:.88rem;padding:6px 14px;border-radius:999px;cursor:pointer;min-height:34px}
+.lang button[aria-pressed="true"]{background:var(--gold);color:var(--deep)}
+.pline{height:3px;background:transparent}
+.pline > i{display:block;height:100%;width:0;background:var(--gold);transition:width .6s ease}
+
+/* ---------------------------------------------------------------- hero */
+.hero{position:relative;background:var(--deep);color:var(--on-dark);overflow:hidden;isolation:isolate}
+.hero-bg{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,#0D1B2A 0%,#112538 55%,#142B3B 100%)}
+.hero-bg .glow{position:absolute;width:900px;height:900px;right:-220px;top:-380px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(244,185,66,.42),rgba(244,185,66,.16) 45%,rgba(244,185,66,0) 72%);
+  animation:drift 22s ease-in-out infinite alternate}
+.hero-bg .grid{position:absolute;inset:0;opacity:.6;
+  background-image:linear-gradient(rgba(252,251,248,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(252,251,248,.045) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 80% at 72% 30%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse 70% 80% at 72% 30%,#000 0%,transparent 75%)}
+.hero-bg svg.flow{position:absolute;left:0;bottom:0;width:100%;height:60%;opacity:.22}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,40px) scale(1.06)}}
+.hero-in{max-width:1180px;margin:0 auto;padding:52px 24px 60px;display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);gap:48px;align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;color:var(--gold);font-weight:600;font-size:.92rem;margin-bottom:14px}
+.kicker::before{content:"";width:22px;height:2px;background:var(--gold);border-radius:2px}
+.hero h1{font-size:clamp(2.15rem,4.4vw,3.5rem);font-weight:700;letter-spacing:-.032em;line-height:1.06;max-width:15ch;color:var(--on-dark)}
+:lang(hi) .hero h1{letter-spacing:-.01em;line-height:1.2}
+.hero .intro{margin:16px 0 26px;max-width:52ch;color:var(--on-dark2);font-size:1.06rem}
+
+/* upload card */
+.upload{background:var(--white);color:var(--ink);border-radius:var(--r-lg);padding:14px;box-shadow:0 30px 60px -28px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.06);max-width:540px}
+.drop{position:relative;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;border:1.5px dashed var(--line2);border-radius:14px;padding:20px 18px;cursor:pointer;background:#fff;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--gold);background:#FFFBF1}
+.drop.over{border-style:solid}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+.drop .ic{grid-row:span 3;width:52px;height:52px;border-radius:12px;background:var(--gold-soft);display:grid;place-items:center;color:var(--gold-ink)}
+.drop .ic svg{width:28px;height:28px}
+.drop strong{font-size:1.08rem;font-weight:600}
+.drop .how2{color:var(--ink2);font-size:.95rem}
+.drop .how2 u{color:var(--ink);font-weight:600;text-decoration-color:var(--gold);text-decoration-thickness:2px}
+.drop .fmt{font-size:.8rem;color:var(--ink2)}
+.t-touch{display:none}
+@media (hover:none){.t-touch{display:inline}.t-desk{display:none}}
+.upstate{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--cream);font-size:.93rem}
+.upstate .fl{display:flex;align-items:center;gap:10px;min-width:0}
+.upstate .fl .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upstate .fl .sz{color:var(--ink2);flex:none;font-size:.84rem}
+.meter{height:6px;border-radius:6px;background:#E9E2D2;margin-top:9px;overflow:hidden}
+.meter > i{display:block;height:100%;width:0;background:var(--navy);border-radius:6px;transition:width .25s}
+.meter.indet > i{width:35%;animation:indet 1.3s ease-in-out infinite}
+@keyframes indet{from{transform:translateX(-100%)}to{transform:translateX(290%)}}
+.upstate .msg2{margin-top:7px;color:var(--ink2)}
+.upstate.ok{background:var(--green-soft)} .upstate.ok .msg2{color:var(--green);font-weight:600}
+.upstate.err{background:var(--risk-soft)} .upstate.err .msg2{color:var(--risk);font-weight:600}
+.upstate .tip{margin-top:4px;color:var(--ink);font-size:.86rem}
+.upstate .again{margin-top:9px}
+.privacy{display:flex;gap:9px;align-items:flex-start;margin:12px 4px 2px;font-size:.82rem;color:var(--ink2);line-height:1.45}
+.privacy svg{flex:none;width:16px;height:16px;margin-top:2px;color:var(--green)}
+.altrow{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:18px}
+.btn-line{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:.95rem;color:var(--on-dark);background:transparent;border:1px solid rgba(252,251,248,.35);border-radius:999px;padding:9px 18px;cursor:pointer;min-height:44px;transition:border-color .2s,background .2s}
+.btn-line:hover{border-color:var(--gold);background:rgba(244,185,66,.08)}
+.trust{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:9px;color:var(--on-dark2);font-size:.9rem}
+.trust li{display:flex;gap:10px;align-items:flex-start}
+.trust svg{flex:none;width:18px;height:18px;color:var(--gold);margin-top:2px}
+
+/* illustration + illustrative example */
+.scene{position:relative;margin:0;display:flex;flex-direction:column;align-items:flex-end}
+.scene-art{display:block;width:100%;height:auto;max-width:560px;margin-left:auto}
+.scene-art .sweep{animation:sweep 7.5s cubic-bezier(.45,0,.25,1) infinite}
+.scene-art .wire{stroke-dasharray:3 9;animation:flowdash 2.8s linear infinite}
+@keyframes sweep{0%{transform:translateX(0)}55%,100%{transform:translateX(330px)}}
+@keyframes flowdash{to{stroke-dashoffset:-48}}
+.example{position:relative;align-self:flex-start;margin:-74px 0 0 0;width:min(340px,78%);background:var(--white);color:var(--ink);border-radius:16px;padding:16px 16px 13px;box-shadow:0 26px 50px -22px rgba(0,0,0,.7)}
+.example .tag{display:inline-block;font-size:.74rem;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:3px 10px}
+.example .who{font-size:.85rem;color:var(--ink2);margin-top:8px}
+.example .big{font-size:1.9rem;font-weight:700;letter-spacing:-.03em;line-height:1.05;margin-top:2px}
+.example .bigl{font-size:.8rem;color:var(--ink2);line-height:1.35;margin-top:3px}
+.example .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.example .mini b{display:block;font-size:.98rem;font-weight:700}
+.example .mini span{display:block;font-size:.72rem;color:var(--ink2);line-height:1.25}
+.example .foot{font-size:.72rem;color:var(--ink2);margin-top:10px;line-height:1.35}
+
+@media (max-width:900px){
+  .hero-in{grid-template-columns:1fr;gap:30px;padding:34px 20px 40px}
+  .hero h1{max-width:17ch}
+  .scene{max-width:520px}
+  .scene-art{margin:0 auto;max-height:300px}
+  .scene{align-items:stretch}
+  .example{width:auto;margin:-40px 10px 0}
+  .hero-bg .glow{width:620px;height:620px;right:-300px;top:-300px}
+}
+@media (max-width:480px){
+  header .hbar{padding:0 14px}
+  .brand small{display:none}
+  .hero-in{padding:26px 16px 34px}
+  .hero .intro{margin:12px 0 20px;font-size:1rem}
+  .upload{padding:10px}
+  .drop{padding:16px 14px;gap:2px 12px}
+  .drop .ic{width:44px;height:44px}
+}
+
+/* ---------------------------------------------------------------- buttons + forms (light surfaces) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:600;border-radius:999px;padding:11px 22px;border:1.5px solid var(--navy);background:var(--navy);color:var(--white);cursor:pointer;min-height:44px;transition:background .15s,box-shadow .15s,transform .15s}
+.btn:hover{background:#1C3A50;box-shadow:0 6px 16px -8px rgba(13,27,42,.5)}
+.btn:active{transform:translateY(1px)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--deep)}
+.btn.gold:hover{background:#F7C55E}
+.btn.ghost{background:transparent;color:var(--navy);border-color:var(--line2)}
+.btn.ghost:hover{border-color:var(--navy);background:#fff;box-shadow:none}
+.btn.sm{padding:6px 15px;font-size:.9rem;min-height:36px}
+.btn:disabled{opacity:.55;cursor:wait;transform:none;box-shadow:none}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label{display:block;font-weight:600;font-size:.92rem;margin-bottom:6px;color:var(--ink)}
+.opt{font-weight:400;color:var(--ink2)}
+input[type=text],input[type=number],textarea,select{width:100%;font:inherit;font-size:1rem;padding:11px 13px;border:1px solid var(--line2);border-radius:var(--r-sm);background:#fff;color:var(--ink);min-height:46px;transition:border-color .15s,box-shadow .15s}
+input:hover,textarea:hover,select:hover{border-color:#B9C3CA}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(244,185,66,.45)}
+input[aria-invalid="true"]{border-color:var(--risk)}
+.help{font-size:.82rem;color:var(--ink2);margin-top:6px;line-height:1.4}
+.ferr{font-size:.85rem;color:var(--risk);font-weight:600;margin-top:6px}
+.ferr:empty{display:none}
+textarea{min-height:130px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
+@media (max-width:600px){.grid2{grid-template-columns:1fr}}
+.status{font-size:.94rem;margin-top:12px;min-height:1.3em}
+.status.err{color:var(--risk);font-weight:600}
+.status:empty{margin-top:0;min-height:0}
+.spin{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------------------------------------------------------------- light sections */
+main{padding:8px 0 20px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;margin:20px 0;box-shadow:var(--shadow)}
+.panel h2{font-size:1.42rem;font-weight:700}
+.eyebrow{font-size:.86rem;font-weight:600;color:var(--gold-ink);margin:0 0 6px}
+.panel p.lead{margin:8px 0 16px;color:var(--ink2);max-width:64ch}
+.note{font-size:.87rem;color:var(--ink2);margin-top:12px;max-width:72ch}
+.seg-toggle{display:inline-flex;gap:3px;background:var(--cream);padding:4px;border-radius:999px;margin:14px 0 6px}
+.seg-toggle button{font:inherit;font-weight:600;font-size:.9rem;border:0;background:transparent;border-radius:999px;padding:7px 15px;cursor:pointer;color:var(--ink2);min-height:36px}
+.seg-toggle button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(13,27,42,.14)}
+.bignum{font-size:clamp(2rem,5vw,2.8rem);font-weight:700;line-height:1.05;letter-spacing:-.03em}
+.bignum small{font-size:.48em;font-weight:600;color:var(--ink2);letter-spacing:0}
+.sub2{color:var(--ink2);margin:6px 0 0}
+details{border-top:1px solid var(--line);padding:12px 0 2px;margin-top:14px}
+details summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;min-height:32px}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:rotate(-45deg);transition:transform .2s;margin-right:4px}
+details[open] summary::before{transform:rotate(45deg)}
+details ul{margin:10px 0 4px;padding-left:20px}details li{margin:4px 0}
+.alert{margin:12px 0 0;padding:11px 14px;border-radius:var(--r-sm);background:var(--warn-soft);color:var(--warn);font-size:.92rem;border-left:3px solid #E0A23A}
+.alert .btn{margin-top:9px}
+.alert.info{background:var(--info-soft);color:var(--ink);border-left-color:#8FA6B8}
+
+/* manual entry */
+.formcard h2{font-size:1.42rem}
+.formcard .acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:22px}
+
+/* progress stepper (a real sequence, so numbered) */
+.run{display:grid;grid-template-columns:104px 1fr;gap:22px;align-items:start}
+.run img{width:104px;height:132px;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:var(--cream)}
+.prow{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:10px 0;opacity:.55;transition:opacity .3s;position:relative}
+.prow:not(:last-child)::after{content:"";position:absolute;left:14px;top:40px;bottom:-4px;width:2px;background:var(--line)}
+.prow.active,.prow.done,.prow.fail{opacity:1}
+.dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line2);display:grid;place-items:center;font-size:.85rem;font-weight:700;color:var(--ink2);background:#fff;position:relative;z-index:1}
+.prow.active .dot{border-color:var(--gold);color:var(--gold-ink)}
+.prow.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.prow.fail .dot{background:var(--risk);border-color:var(--risk);color:#fff}
+.prow b{display:block;font-weight:600}
+.prow span{font-size:.88rem;color:var(--ink2)}
+@media (max-width:480px){.run{grid-template-columns:1fr}.run img{display:none}}
+
+/* ---------------------------------------------------------------- results summary */
+.summary{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);margin:24px 0 20px;overflow:hidden;box-shadow:0 2px 4px rgba(13,27,42,.05),0 24px 48px -28px rgba(13,27,42,.35)}
+.sumTop{position:relative;background:var(--navy);color:var(--on-dark);padding:28px 28px 24px;overflow:hidden;isolation:isolate}
+.sumTop::before{content:"";position:absolute;z-index:-1;width:520px;height:520px;right:-180px;top:-300px;border-radius:50%;background:radial-gradient(closest-side,rgba(244,185,66,.38),rgba(244,185,66,0))}
+.sumTop .sl{color:var(--gold);font-weight:600;font-size:.95rem}
+.sumNum{font-size:clamp(2.5rem,7vw,3.7rem);font-weight:700;letter-spacing:-.035em;line-height:1.02;margin-top:4px}
+.sumNum .per{font-size:.4em;font-weight:600;letter-spacing:0;color:var(--on-dark2)}
+.sumTop .ss{color:var(--on-dark2);margin-top:6px}
+.verdict{margin-top:16px;padding-top:14px;border-top:1px solid rgba(252,251,248,.16);font-size:1.06rem;font-weight:500;color:var(--on-dark);max-width:62ch}
+.sumBody{padding:20px 28px 24px}
+.locrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pin{display:inline-flex;align-items:center;gap:7px;background:var(--cream);border-radius:999px;padding:6px 14px;font-weight:600;font-size:.93rem}
+.pin svg{width:15px;height:15px;color:var(--gold-ink);flex:none}
+.pin small{font-weight:400;color:var(--ink2);font-size:.85rem}
+@media (max-width:520px){.pin{flex-wrap:wrap;border-radius:14px}.pin small{flex-basis:100%}}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:18px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kpi{padding:15px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.kpi:nth-child(3n){border-right:0}
+.kpi:nth-last-child(-n+3){border-bottom:0}
+.kpi .k{font-size:.84rem;color:var(--ink2);font-weight:500}
+.kpi .v{font-size:1.42rem;font-weight:700;line-height:1.2;margin-top:3px;letter-spacing:-.015em}
+.kpi .s{font-size:.8rem;color:var(--ink2);line-height:1.35;margin-top:3px}
+.kpi.pos .v{color:var(--green)}
+@media (max-width:680px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi:nth-child(3n){border-right:1px solid var(--line)}
+  .kpi:nth-child(2n){border-right:0}
+  .kpi:nth-last-child(-n+3){border-bottom:1px solid var(--line)}
+  .kpi:nth-last-child(-n+2){border-bottom:0}
+  .sumTop,.sumBody{padding-left:18px;padding-right:18px}
+}
+.alsoline{display:flex;gap:9px;align-items:center;margin-top:14px;color:var(--green);font-weight:600;font-size:.94rem}
+.alsoline svg{width:18px;height:18px;flex:none}
+.incl{margin-top:10px;font-size:.88rem;color:var(--ink2)}
+.inputs{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+.inputs b{color:var(--ink)}
+.editbox{margin-top:14px;padding:16px;border-radius:var(--r-sm);background:var(--cream)}
+.verify ol{margin:12px 0 0;padding:0;list-style:none;counter-reset:v;display:grid;gap:12px}
+.verify li{counter-increment:v;display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start}
+.verify li::before{content:counter(v);width:28px;height:28px;border-radius:50%;background:var(--gold-soft);color:var(--gold-ink);font-weight:700;font-size:.85rem;display:grid;place-items:center}
+.verify li b{display:block;font-weight:600}
+.verify li span{color:var(--ink2);font-size:.92rem}
+
+/* ---------------------------------------------------------------- history */
+.bars{display:grid;gap:6px;align-items:end;height:160px;margin:18px 0 5px}
+.bars.m12{grid-template-columns:repeat(12,1fr)}
+.bars.y5{grid-template-columns:repeat(5,1fr);gap:16px}
+.bar{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.bar i{display:block;background:linear-gradient(180deg,#F4B942,#E3A12C);border-radius:6px 6px 2px 2px;min-height:4px;height:0;transition:height .7s cubic-bezier(.2,.7,.2,1)}
+.bar em{font-style:normal;font-size:.74rem;font-weight:600;text-align:center;margin-bottom:4px;white-space:nowrap}
+.blabels{display:grid;gap:6px;font-size:.74rem;color:var(--ink2);text-align:center}
+.blabels.m12{grid-template-columns:repeat(12,1fr)}
+.blabels.y5{grid-template-columns:repeat(5,1fr);gap:16px}
+.livebox{display:flex;gap:13px;align-items:center;margin-top:18px;padding:13px 15px;border-radius:var(--r-sm);background:var(--cream)}
+.livebox .sunball{flex:none;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#FFF3C8,#F4B942 62%,#E3A12C);box-shadow:0 0 0 6px rgba(244,185,66,.2)}
+.livebox.night .sunball{background:radial-gradient(circle,#EDF2F6,#8FA6B8);box-shadow:0 0 0 6px rgba(143,166,184,.2)}
+.livebox .hint{font-size:.9rem;color:var(--ink2)}
+
+/* ---------------------------------------------------------------- per panel */
+.ptiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 4px}
+.ptile{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff}
+.ptile.hot{background:var(--gold-soft);border-color:#EED9A6}
+.ptile .v{font-size:1.32rem;font-weight:700;line-height:1.15}
+.ptile .k{font-size:.8rem;color:var(--ink2);margin-top:3px;line-height:1.3}
+@media (max-width:680px){.ptiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.array{margin:16px 0 4px;text-align:center}
+.array svg{max-width:100%;height:auto}
+.ladder{margin-top:10px}
+.lrow{display:grid;grid-template-columns:1.05fr 1fr 1fr 1fr 1.7fr auto;gap:8px 12px;align-items:center;padding:12px 13px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:#fff}
+.lrow.head{border:0;background:transparent;font-size:.8rem;font-weight:600;color:var(--ink2);padding-top:2px;padding-bottom:0;margin-bottom:0}
+.lrow.best{border:2px solid var(--gold);background:#FFFBF1}
+.lrow .sz{font-weight:700;font-size:1.05rem}
+.lrow .sz small{display:block;font-weight:400;font-size:.78rem;color:var(--ink2)}
+.lrow .tag{display:inline-block;background:var(--gold);color:var(--deep);font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 9px;margin-left:5px;vertical-align:2px}
+.lrow .ex{font-size:.85rem;color:var(--ink2);line-height:1.35}
+.lrow .ex b{color:var(--ink)}
+.nb{white-space:nowrap}
+.good{color:var(--green)} .meh{color:var(--warn)} .bad{color:var(--risk)}
+.lrow .go{font:inherit;font-size:.84rem;font-weight:600;border:1px solid var(--line2);background:#fff;border-radius:999px;padding:6px 13px;cursor:pointer;min-height:34px;color:var(--navy)}
+.lrow .go:hover:not(:disabled){border-color:var(--navy)}
+.lrow .go:disabled{opacity:.45;cursor:default}
+@media (max-width:760px){
+  .lrow.head{display:none}
+  .lrow{grid-template-columns:1fr 1fr}
+  .lrow > *{min-width:0}
+  .lrow [data-l]::before{content:attr(data-l);display:block;font-size:.74rem;font-weight:600;color:var(--ink2)}
+  .lrow .ex,.lrow .go{grid-column:1/-1}
+}
+
+/* ---------------------------------------------------------------- break-even */
+.chart{margin:14px 0 0}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--font);font-size:11px;fill:#5E6D79}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.86rem;color:var(--ink2);margin-top:8px}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;margin-right:7px;vertical-align:3px}
+
+/* ---------------------------------------------------------------- planet */
+.itiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.itile{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;min-width:0}
+.itile svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px;color:var(--gold-ink)}
+.itile .v{font-size:1.42rem;font-weight:700;line-height:1.12}
+.itile .v small{font-size:.56em;font-weight:600;color:var(--ink2)}
+.itile .k{font-size:.82rem;color:var(--ink2);margin-top:3px;line-height:1.32}
+.itile.coal{background:var(--navy);border-color:var(--navy);color:var(--on-dark)}
+.itile.coal svg{color:var(--gold)} .itile.coal .k,.itile.coal .v small{color:var(--on-dark2)}
+.itile.petrol,.itile.co2{background:var(--cream);border-color:#EAE2D0}
+.itile.good2{background:var(--green-soft);border-color:#C9E2D3;color:var(--green)}
+.itile.good2 svg{color:var(--green)} .itile.good2 .k{color:#205F43}
+@media (max-width:680px){.itiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------------------------------------------------------------- subsidy */
+table.money{width:100%;border-collapse:collapse;font-size:.98rem;margin:10px 0 4px}
+table.money td{padding:10px 0;border-bottom:1px solid var(--line)}
+table.money td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;padding-left:12px}
+table.money tr.total td{border-bottom:0;font-weight:700;font-size:1.1rem;padding-top:13px}
+table.money tr.minus td:last-child{color:var(--green)}
+.timeline{display:grid;margin:16px 0 4px;border-left:2px solid var(--gold);padding-left:18px}
+.tl{position:relative;padding:3px 0 13px}
+.tl::before{content:"";position:absolute;left:-25px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid #fff}
+.tl b{display:block;font-weight:600}
+.tl span{color:var(--ink2);font-size:.9rem}
+.topup{margin-top:12px;padding:12px 14px;border:1px dashed var(--line2);border-radius:var(--r-sm);font-size:.92rem;background:var(--white)}
+.topup .hint{color:var(--ink2)}
+
+/* ---------------------------------------------------------------- roof */
+.steps{margin:6px 0 0;padding:0;list-style:none;counter-reset:s;display:grid;gap:8px}
+.steps li{counter-increment:s;display:flex;gap:10px;align-items:baseline;font-size:.94rem}
+.steps li::before{content:counter(s);flex:none;width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--white);font-size:.76rem;font-weight:700;display:grid;place-items:center;transform:translateY(3px)}
+#map{height:400px;border-radius:var(--r-sm);border:1px solid var(--line);margin-top:12px;cursor:crosshair}
+@media (max-width:520px){#map{height:320px}}
+.areaBar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px;align-items:center;padding:12px 14px;border-radius:var(--r-sm);background:var(--cream)}
+.areaBar .big{font-size:1.3rem;font-weight:700}
+.areaBar .hint{color:var(--ink2);font-size:.9rem}
+.caveat{display:flex;gap:10px;margin-top:14px;font-size:.88rem;color:var(--ink2)}
+.caveat svg{flex:none;width:18px;height:18px;color:var(--gold-ink);margin-top:2px}
+
+/* ---------------------------------------------------------------- quote */
+.tabs{display:inline-flex;gap:3px;margin-bottom:14px;background:var(--cream);padding:4px;border-radius:999px}
+.tabs button{font:inherit;font-weight:600;border:0;background:transparent;border-radius:999px;padding:8px 16px;cursor:pointer;color:var(--ink2);min-height:38px}
+.tabs button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(13,27,42,.14)}
+.qdrop{grid-template-columns:auto 1fr}
+.qhead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:16px 0 4px;padding:14px 16px;border-radius:var(--r-sm);background:var(--cream)}
+.qhead .pk{font-weight:600;font-variant-numeric:tabular-nums}
+.qhead .vn{flex-basis:100%;font-size:.86rem;color:var(--ink2)}
+.badge{display:inline-block;font-weight:700;border-radius:999px;padding:5px 14px;font-size:.92rem}
+.badge.fair{background:var(--green-soft);color:var(--green)}
+.badge.overpriced,.badge.risk{background:var(--risk-soft);color:var(--risk)}
+.badge.suspiciously_low,.badge.unknown{background:var(--warn-soft);color:var(--warn)}
+.qgroup{margin-top:18px}
+.qgroup h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+.overpay{margin:12px 0 0;padding:12px 15px;background:var(--risk-soft);border-radius:var(--r-sm);font-weight:600;color:var(--risk)}
+.flag{border-left:3px solid var(--line2);padding:11px 14px;margin:8px 0;background:var(--white);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.flag.high{border-color:var(--risk);background:var(--risk-soft)}
+.flag.medium{border-color:#E0A23A;background:var(--warn-soft)}
+.flag .ask{font-size:.9rem;color:var(--ink2);margin-top:4px}
+.flag .ask b{color:var(--ink)}
+.ok{color:var(--green);margin:6px 0;font-weight:600;display:flex;gap:8px}
+.ok::before{content:"✓"}
+
+/* ---------------------------------------------------------------- chat */
+.chatlog{display:flex;flex-direction:column;gap:10px;margin:6px 0 14px;max-height:420px;overflow:auto}
+.chatlog:empty{display:none}
+.msg{padding:11px 14px;border-radius:14px;max-width:88%;font-size:.96rem;line-height:1.5}
+.msg p + p{margin-top:8px}
+.msg ul,.msg ol{margin:6px 0 0;padding-left:20px}
+.msg.me{align-self:flex-end;background:var(--navy);color:var(--white);border-bottom-right-radius:4px;white-space:pre-wrap}
+.msg.bot{align-self:flex-start;background:var(--cream);border-bottom-left-radius:4px}
+.msg.bot.err{background:var(--risk-soft);color:var(--risk)}
+.msg .typing{display:inline-flex;gap:4px;align-items:center}
+.msg .typing i{width:6px;height:6px;border-radius:50%;background:var(--ink2);animation:blink 1.2s infinite}
+.msg .typing i:nth-child(2){animation-delay:.2s}.msg .typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.suggest{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.suggest button{font:inherit;font-size:.88rem;border:1px solid var(--line2);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink);min-height:38px;text-align:left}
+.suggest button:hover{border-color:var(--navy)}
+.chatform{display:flex;gap:10px}
+.chatform input{flex:1;min-width:0}
+.disclaim{font-size:.82rem;color:var(--ink2);margin-top:10px}
+
+/* ---------------------------------------------------------------- how it works */
+.how{background:var(--cream);border-top:1px solid #EDE5D3;margin-top:28px;padding:44px 0 48px}
+.how h2{font-size:1.5rem;font-weight:700}
+.how .lead{color:var(--ink2);margin-top:8px;max-width:62ch}
+.howsteps{list-style:none;padding:0;margin:24px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;counter-reset:h}
+.howsteps li{counter-increment:h}
+.howsteps li::before{content:counter(h);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:700;margin-bottom:10px}
+.howsteps b{display:block;font-weight:600;margin-bottom:4px}
+.howsteps span{color:var(--ink2);font-size:.93rem}
+.howfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+.howfacts div{background:var(--white);border:1px solid #EDE5D3;border-radius:var(--r);padding:16px}
+.howfacts b{display:block;font-weight:600;margin-bottom:4px}
+.howfacts span{color:var(--ink2);font-size:.92rem}
+@media (max-width:760px){.howsteps,.howfacts{grid-template-columns:1fr}}
+
+/* ---------------------------------------------------------------- footer */
+footer{background:var(--deep);color:var(--on-dark2);padding:30px 0 46px;font-size:.86rem}
+footer .wrap > p{margin:7px 0;max-width:80ch}
+footer a{color:var(--on-dark)}
+footer b{color:var(--on-dark);font-weight:600}
+
+.reveal{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .hero-bg .glow,.scene-art .sweep,.scene-art .wire,.spin,.meter.indet > i,.msg .typing i{animation:none}
+  .scene-art .sweep{display:none}
+  .reveal{animation:none}
+  .bar i,.pline > i,.meter > i{transition:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <a class="brand" href="#top" aria-label="Surya Sahayak">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <circle cx="22" cy="11" r="6" fill="#F4B942"/>
+        <g stroke="#F4B942" stroke-width="1.8" stroke-linecap="round"><path d="M22 1.5v2.2M31.5 11h-2.2M28.7 4.3l-1.6 1.6M15.3 4.3l1.6 1.6"/></g>
+        <path d="M3 30l5-11h17l5 11z" fill="#FCFBF8"/>
+        <path d="M11.3 19l-2.1 11M19.7 19l2.1 11M5.5 24.5h22" stroke="#0D1B2A" stroke-width="1.4"/>
+      </svg>
+      <span><b data-t="brand">Surya Sahayak</b><small data-t="tag">Your roof, in rupees</small></span>
+    </a>
+    <div class="lang" role="group" aria-label="Language / भाषा">
+      <button type="button" data-lang="en" aria-pressed="true" lang="en">English</button>
+      <button type="button" data-lang="hi" aria-pressed="false" lang="hi">हिंदी</button>
+    </div>
+  </div>
+  <div class="pline"><i id="pfill"></i></div>
+</header>
+
+<!-- ======================================================================= hero -->
+<section class="hero" id="top" aria-labelledby="h1">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <svg class="flow" viewBox="0 0 1200 400" preserveAspectRatio="none">
+      <g fill="none" stroke="#F4B942" stroke-width="1">
+        <path d="M-20 330C220 250 380 360 620 290S1000 160 1220 210"/>
+        <path d="M-20 370C260 300 420 390 660 330S1020 220 1220 260" opacity=".6"/>
+        <path d="M-20 300C200 220 400 320 600 250S980 110 1220 150" opacity=".4"/>
+      </g>
+    </svg>
+  </div>
+  <div class="hero-in">
+    <div>
+      <p class="kicker" data-t="tag">Your roof, in rupees</p>
+      <h1 id="h1" data-t="h1">Know what your roof could save you.</h1>
+      <p class="intro" data-t="intro">Upload one electricity bill. You'll see the estimated savings, what the subsidy covers and roughly when the system pays for itself, worked out from five years of real weather over your roof.</p>
+
+      <div class="upload">
+        <label class="drop" id="billDrop">
+          <input type="file" id="billFile" accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf" aria-describedby="billFmt privacyTxt">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg></span>
+          <strong data-t="dropT">Upload your electricity bill</strong>
+          <span class="how2"><span class="t-desk" data-t="dropDesk">Drop a photo or PDF here, or</span><span class="t-touch" data-t="dropMob">Take a photo of the bill, or</span> <u data-t="choose">choose a file</u></span>
+          <span class="fmt" id="billFmt" data-t="dropH">JPG, PNG, WEBP or PDF, up to 10 MB</span>
+        </label>
+        <div class="upstate hidden" id="upState" role="status" aria-live="polite"></div>
+        <p class="privacy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          <span id="privacyTxt"></span>
+        </p>
+      </div>
+
+      <div class="altrow">
+        <button class="btn-line" id="manualLink" type="button" data-t="manualLink">No bill handy? Enter your units and city</button>
+      </div>
+      <ul class="trust">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span data-t="trust1">Five years of hourly weather for your roof, not a national average</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg><span data-t="trust2">Central and state subsidy rules, dated and linked to the official portals</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span data-t="trust3">Every assumption listed, so you can check the numbers yourself</span></li>
+      </ul>
+    </div>
+
+    <figure class="scene">
+      <svg class="scene-art" viewBox="0 0 520 420" role="img" aria-labelledby="sceneT">
+        <title id="sceneT">Illustration: a two-storey home with a flat roof, a water tank and rooftop solar panels in morning sun</title>
+        <defs>
+          <linearGradient id="wallG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24445E"/><stop offset="1" stop-color="#1A354A"/></linearGradient>
+          <linearGradient id="panelG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B3D5E"/><stop offset="1" stop-color="#0F2840"/></linearGradient>
+          <linearGradient id="sweepG" x1="0" x2="1"><stop offset="0" stop-color="#FFE7B0" stop-opacity="0"/><stop offset=".5" stop-color="#FFE7B0" stop-opacity=".55"/><stop offset="1" stop-color="#FFE7B0" stop-opacity="0"/></linearGradient>
+          <radialGradient id="sunG"><stop offset="0" stop-color="#FFF4D2"/><stop offset=".45" stop-color="#F4B942"/><stop offset="1" stop-color="#F4B942" stop-opacity="0"/></radialGradient>
+          <clipPath id="panelsClip">
+            <path d="M142 182l10-34h48l-10 34zM194 182l10-34h48l-10 34zM246 182l10-34h48l-10 34zM154 142l9-30h46l-9 30zM204 142l9-30h46l-9 30zM254 142l9-30h46l-9 30z"/>
+          </clipPath>
+        </defs>
+        <circle cx="420" cy="104" r="100" fill="url(#sunG)" opacity=".5"/>
+        <circle cx="420" cy="104" r="32" fill="#F7C65A"/>
+        <!-- neighbours -->
+        <rect x="0" y="246" width="104" height="174" fill="#132B40"/>
+        <rect x="18" y="270" width="22" height="26" fill="#F4B942" opacity=".35"/><rect x="58" y="270" width="22" height="26" fill="#F4B942" opacity=".18"/>
+        <rect x="438" y="226" width="82" height="194" fill="#132B40"/>
+        <rect x="456" y="252" width="20" height="24" fill="#F4B942" opacity=".22"/><rect x="456" y="300" width="20" height="24" fill="#F4B942" opacity=".32"/>
+        <g fill="#183A4C"><circle cx="96" cy="300" r="26"/><circle cx="76" cy="318" r="22"/><circle cx="112" cy="322" r="20"/></g>
+        <rect x="92" y="330" width="6" height="80" fill="#142B3B"/>
+        <!-- house -->
+        <rect x="120" y="198" width="292" height="212" fill="url(#wallG)"/>
+        <rect x="112" y="190" width="308" height="12" rx="2" fill="#2C4C66"/>
+        <rect x="112" y="298" width="308" height="9" fill="#2C4C66"/>
+        <g fill="#F4B942"><rect x="146" y="226" width="44" height="50" rx="2" opacity=".9"/><rect x="232" y="226" width="44" height="50" rx="2" opacity=".55"/><rect x="318" y="226" width="44" height="50" rx="2" opacity=".85"/>
+          <rect x="146" y="332" width="48" height="44" rx="2" opacity=".7"/><rect x="330" y="332" width="48" height="44" rx="2" opacity=".5"/></g>
+        <g stroke="#1A354A" stroke-width="3"><path d="M168 226v50M146 251h44M254 226v50M232 251h44M340 226v50M318 251h44M170 332v44M146 354h48M354 332v44M330 354h48"/></g>
+        <path d="M120 298v-14h292v14" fill="none" stroke="#3A5B76" stroke-width="2"/>
+        <g stroke="#3A5B76" stroke-width="2"><path d="M140 284v14M170 284v14M200 284v14M230 284v14M260 284v14M290 284v14M320 284v14M350 284v14M380 284v14"/></g>
+        <rect x="242" y="326" width="50" height="84" rx="2" fill="#0E2233"/><circle cx="283" cy="370" r="2.6" fill="#F4B942"/>
+        <rect x="126" y="318" width="18" height="24" rx="2" fill="#0E2233" stroke="#3A5B76"/><circle cx="135" cy="326" r="2" fill="#3FBF7F"/>
+        <rect x="80" y="388" width="372" height="22" fill="#172F43"/>
+        <rect x="0" y="410" width="520" height="10" fill="#0B1724"/>
+        <!-- roof: stair room + water tank -->
+        <rect x="328" y="138" width="74" height="54" fill="#21405A"/><rect x="342" y="154" width="18" height="38" fill="#122A3E"/>
+        <rect x="346" y="100" width="42" height="38" rx="5" fill="#0B1724"/>
+        <ellipse cx="367" cy="100" rx="21" ry="5" fill="#26425A"/>
+        <g stroke="#26425A" stroke-width="1.5"><path d="M346 112h42M346 124h42"/></g>
+        <!-- panels on a raised frame -->
+        <g stroke="#7E95AA" stroke-width="2"><path d="M150 190v-10M188 190v-8M240 190v-10M292 190v-8M166 182v-40M216 182v-40M266 182v-40M300 182v-40"/></g>
+        <g fill="url(#panelG)" stroke="#5E7F9C" stroke-width="1.2">
+          <path d="M154 142l9-30h46l-9 30z"/><path d="M204 142l9-30h46l-9 30z"/><path d="M254 142l9-30h46l-9 30z"/>
+          <path d="M142 182l10-34h48l-10 34z"/><path d="M194 182l10-34h48l-10 34z"/><path d="M246 182l10-34h48l-10 34z"/>
+        </g>
+        <g stroke="#2F5577" stroke-width=".9" clip-path="url(#panelsClip)">
+          <path d="M120 165h220M120 127h220M170 100l-24 90M185 100l-24 90M222 100l-24 90M237 100l-24 90M274 100l-24 90M289 100l-24 90"/>
+        </g>
+        <g clip-path="url(#panelsClip)"><rect class="sweep" x="40" y="100" width="70" height="90" fill="url(#sweepG)"/></g>
+        <path class="wire" d="M146 184C130 192 116 204 116 232V330H126" fill="none" stroke="#F4B942" stroke-width="2" opacity=".75"/>
+      </svg>
+      <figcaption class="example">
+        <span class="tag" data-t="exTag">Illustrative example, not your estimate</span>
+        <p class="who" data-t="exWho">A Delhi home using 512 units a month</p>
+        <p class="big tnum">₹26,700</p>
+        <p class="bigl" data-t="exBigL">value of the electricity a 3 kW roof would have made there in the last 12 months</p>
+        <div class="mini">
+          <div><b>3 kW</b><span data-t="exA">6 panels</span></div>
+          <div><b class="tnum">4,800</b><span data-t="exB">units in 12 months</span></div>
+          <div><b>2.6 t</b><span data-t="exC">coal not burned a year</span></div>
+        </div>
+        <p class="foot" data-t="exFoot">Worked out by Surya Sahayak with real weather on 11 Oct 2026. Your report uses your own bill.</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- ============ manual details (no bill) ============ -->
+  <section class="panel formcard hidden" id="manualBox" aria-labelledby="manualH">
+    <h2 id="manualH" data-t="manualH">Enter your details</h2>
+    <p class="lead" data-t="manualP">Use the numbers from any recent bill. Nothing is filled in for you, and you can change it later.</p>
+    <form id="manualForm" novalidate>
+      <div class="grid2">
+        <div>
+          <label for="mUnits" data-t="unitsL">Units used per month</label>
+          <input type="number" id="mUnits" min="1" max="20000" step="1" inputmode="numeric" autocomplete="off" aria-describedby="mUnitsH mUnitsE">
+          <p class="help" id="mUnitsH" data-t="unitsHelp">Printed as “Units consumed” or “kWh”. For a monthly average, add a few bills and divide.</p>
+          <p class="ferr" id="mUnitsE"></p>
+        </div>
+        <div>
+          <label for="mCity" data-t="cityL">City or 6-digit PIN code</label>
+          <input type="text" id="mCity" autocomplete="postal-code" aria-describedby="mCityH mCityE">
+          <p class="help" id="mCityH" data-t="cityHelp">For example Pune, or 411005.</p>
+          <p class="ferr" id="mCityE"></p>
+        </div>
+        <div>
+          <label for="mState"><span data-t="stateL">State</span> <span class="opt" data-t="optional">(optional)</span></label>
+          <select id="mState" aria-describedby="mStateH"></select>
+          <p class="help" id="mStateH" data-t="stateHelp">Leave it blank and we'll work it out from the city.</p>
+        </div>
+        <div>
+          <label for="mLoad"><span data-t="loadL">Sanctioned load in kW</span> <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="number" id="mLoad" min="0.5" max="100" step="0.5" inputmode="decimal" aria-describedby="mLoadH mLoadE">
+          <p class="help" id="mLoadH" data-t="loadHelp">Printed as “Sanctioned load” or “Connected load”. It can limit the system size.</p>
+          <p class="ferr" id="mLoadE"></p>
+        </div>
+      </div>
+      <div class="acts">
+        <button class="btn" id="manualGo" type="submit" data-t="showPlan">Show my estimate</button>
+        <button class="btn ghost" id="manualCancel" type="button" data-t="cancel">Cancel</button>
+      </div>
+      <div class="status" id="manualStatus" role="status"></div>
+    </form>
+  </section>
+
+  <!-- ============ progress ============ -->
+  <section class="panel hidden" id="progress" aria-live="polite" aria-labelledby="progH">
+    <h2 class="sr" id="progH" data-t="progH">Working out your estimate</h2>
+    <div class="run">
+      <img id="runImg" alt="" class="hidden">
+      <div id="runRows"></div>
+    </div>
+    <div class="status" id="runStatus" role="status"></div>
+  </section>
+
+  <!-- ============ asks only for what could not be read ============ -->
+  <section class="panel formcard hidden" id="needs">
+    <p class="note" id="needRead" style="margin:0 0 12px"></p>
+    <div id="needUnits" class="hidden">
+      <h2 data-t="needUnitsT">We couldn't read the units on your bill</h2>
+      <p class="lead" data-t="needUnitsP">Type the number next to “Units consumed” or “kWh”. Everything else we read is kept.</p>
+      <div style="max-width:300px"><label for="nUnits" data-t="unitsL">Units used per month</label><input type="number" id="nUnits" min="1" max="20000" step="1" inputmode="numeric"></div>
+    </div>
+    <div id="needLoc" class="hidden" style="margin-top:14px">
+      <h2 data-t="needLocT">Where is your home?</h2>
+      <p class="lead" data-t="needLocP">We couldn't find your location from the bill or your device. Type your city or 6-digit PIN code.</p>
+      <div style="max-width:340px"><label for="nCity" data-t="cityL">City or 6-digit PIN code</label><input type="text" id="nCity" autocomplete="postal-code"></div>
+    </div>
+    <div class="row" style="margin-top:18px"><button class="btn" id="needGo" type="button" data-t="cont">Continue</button></div>
+    <div class="status" id="needStatus" role="status"></div>
+  </section>
+
+  <!-- ============ the report ============ -->
+  <div id="report" class="hidden"></div>
+
+  <!-- ============ extras (kept alive across re-renders) ============ -->
+  <div id="extras" class="hidden">
+    <section class="panel" id="roofBox" aria-labelledby="roofH">
+      <p class="eyebrow" data-t="roofEye">Optional check</p>
+      <h2 id="roofH" data-t="roofH">Will it fit on your roof?</h2>
+      <p class="lead" id="roofLead"></p>
+      <details id="roofDetails" style="border-top:0;padding-top:0;margin-top:0">
+        <summary data-t="roofOpen">Measure your roof on the satellite map</summary>
+        <ol class="steps" style="margin-top:12px">
+          <li data-t="r1">Find your house: type the address and press Find.</li>
+          <li data-t="r2">Tap each corner of the open roof where panels could go. Leave out the tank and stair room.</li>
+          <li data-t="r3">Press Recalculate. The plan is resized to what fits.</li>
+        </ol>
+        <div class="row" style="margin-top:14px">
+          <label for="addr" class="sr" data-t="addrL">Address</label>
+          <input type="text" id="addr" style="flex:1;min-width:200px" placeholder="House, street, area, city" data-tp="addrPh">
+          <button class="btn sm" id="findAddr" type="button" data-t="find">Find</button>
+        </div>
+        <div id="map" role="application" aria-label="Satellite map. Tap to add roof corners."></div>
+        <div class="areaBar">
+          <div><span data-t="area">Roof area</span>: <span class="big tnum" id="areaVal">0 m²</span> <span class="hint" id="fitsVal"></span></div>
+          <div class="row">
+            <button class="btn sm ghost" id="undoPt" type="button" data-t="undo">Undo last corner</button>
+            <button class="btn sm ghost" id="clearPts" type="button" data-t="clear">Start again</button>
+          </div>
+        </div>
+        <div style="margin-top:14px;max-width:300px"><label for="manualArea" data-t="manualL">Or type the open roof area (m²)</label><input type="number" id="manualArea" min="5" max="5000" step="1" inputmode="numeric" aria-describedby="manualAreaE"><p class="ferr" id="manualAreaE"></p></div>
+        <div class="row" style="margin-top:14px"><button class="btn" id="roofGo" type="button" data-t="roofGo">Recalculate with my roof</button></div>
+        <div class="status" id="roofStatus" role="status"></div>
+        <p class="caveat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span data-t="roofCaveat">Roof area is only one check. Shade from trees and buildings, which way the roof faces, its strength and access all need a site survey by a registered vendor before you sign.</span></p>
+      </details>
+    </section>
+
+    <section class="panel" id="quoteBox" aria-labelledby="qH">
+      <p class="eyebrow" data-t="qEye">Vendor quote check</p>
+      <h2 id="qH" data-t="s4h">Before you sign, know what you're paying for.</h2>
+      <p class="lead" data-t="s4p">Upload or paste a vendor's quotation. We compare its price per kW with typical market rates and list what to clarify before you pay. It's a checklist to help you ask better questions, not a legal or subsidy approval.</p>
+      <div class="tabs" role="tablist" aria-label="Quote input">
+        <button type="button" role="tab" aria-selected="true" data-qtab="file" data-t="qUpload">Upload the quote</button>
+        <button type="button" role="tab" aria-selected="false" data-qtab="text" data-t="qPaste">Paste its text</button>
+      </div>
+      <div id="qFileBox">
+        <label class="drop qdrop" id="quoteDrop">
+          <input type="file" id="quoteFile" accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf,.txt">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+          <strong data-t="qPick">Choose the quotation</strong>
+          <span class="fmt" data-t="qHint">Photo, PDF or .txt, up to 10 MB</span>
+        </label>
+      </div>
+      <div id="qTextBox" class="hidden">
+        <label for="quoteText" class="sr" data-t="qPaste">Paste its text</label>
+        <textarea id="quoteText" placeholder="Paste the full quotation here" data-tp="qPh"></textarea>
+        <div class="row" style="margin-top:12px"><button class="btn" id="checkText" type="button" data-t="qCheck">Check this quote</button></div>
+      </div>
+      <div class="status" id="quoteStatus" role="status"></div>
+      <div id="quoteResult"></div>
+    </section>
+
+    <section class="panel" id="askBox" aria-labelledby="askH">
+      <p class="eyebrow" data-t="askEye">Ask about your estimate</p>
+      <h2 id="askH" data-t="s5h">Questions about your numbers?</h2>
+      <p class="lead" data-t="s5p">Ask in English or Hindi. Answers use the numbers in your report.</p>
+      <div class="chatlog" id="chatlog" aria-live="polite"></div>
+      <div class="suggest" id="suggest"></div>
+      <form class="chatform" id="chatForm">
+        <label for="chatIn" class="sr" data-t="ask">Ask</label>
+        <input type="text" id="chatIn" placeholder="e.g. What affects my payback period?" data-tp="chatPh" autocomplete="off">
+        <button class="btn" type="submit" data-t="ask">Ask</button>
+      </form>
+      <p class="disclaim" data-t="disclaim">Answers explain this estimate. They are not an official subsidy approval or installation advice.</p>
+    </section>
+  </div>
+</main>
+
+<!-- ======================================================================= how it works -->
+<section class="how" id="how" aria-labelledby="howH">
+  <div class="wrap">
+    <h2 id="howH" data-t="howH">How the estimate is made</h2>
+    <p class="lead" data-t="howP">Three steps, all shown in your report. The language model only reads your bill and answers questions; the arithmetic is ordinary code you can check.</p>
+    <ol class="howsteps">
+      <li><b data-t="how1T">Read the bill</b><span data-t="how1">Amazon Bedrock reads the units, sanctioned load, electricity company and PIN code. If anything is unclear, we ask you instead of guessing.</span></li>
+      <li><b data-t="how2T">Replay the weather</b><span data-t="how2">Five years of hourly sunshine and temperature for your spot (Open-Meteo, ERA5) show what a south-facing roof would have produced, checked against PVGIS's long-term average.</span></li>
+      <li><b data-t="how3T">Apply today's rules and prices</b><span data-t="how3">Central and state subsidies, typical installed prices, your tariff and a 25-year cash flow give the savings and the payback range.</span></li>
+    </ol>
+    <div class="howfacts">
+      <div><b data-t="hf1T">What we use</b><span data-t="hf1">Units, sanctioned load, electricity company, and the PIN code or city. Your approximate location, if you allow it.</span></div>
+      <div><b data-t="hf2T">What stays out</b><span data-t="hf2">Your name and account number aren't used in the calculations, and weather or map services never receive them.</span></div>
+      <div><b data-t="hf3T">What to confirm</b><span data-t="hf3">Subsidy amounts, prices and payback are estimates. Confirm them on pmsuryaghar.gov.in and with a registered vendor.</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p data-t="foot">Estimates, not a sanction or a guaranteed return. Subsidy rules change: confirm on <a href="https://pmsuryaghar.gov.in" target="_blank" rel="noopener">pmsuryaghar.gov.in</a> and <a href="https://solar.delhi.gov.in" target="_blank" rel="noopener">solar.delhi.gov.in</a>.</p>
+    <p data-t="builtline">Your bill is read with Amazon Bedrock. Weather and map services only see an approximate location (about 1 km), or your PIN code or city, never your name, bill number or street address. With no GPS and no address on the bill, your network address is used once to guess the city.</p>
+    <p id="credits"></p>
+    <p id="asofFoot"></p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+"use strict";
+const API = "/api";
+const $ = (id) => document.getElementById(id);
+const RM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const S = { lang:"en", file:null, bill:null, loc:null, gps:null, gpsNote:null, report:null, roofArea:null, kw:null,
+            unitsOverride:null, extra:{}, view:{hist:"12", impact:"12"}, quote:null, session:null, busy:false, stage:[], health:null, manual:false };
+const MAX_MB = 10, OK_EXT = ["jpg","jpeg","png","webp","pdf"];
+
+/* ====================================================================== copy: [English, हिंदी] */
+const TX = {
+  brand:["Surya Sahayak","सूर्य सहायक"], tag:["Your roof, in rupees","आपकी छत, रुपयों में"],
+  h1:["Know what your roof could save you.","जानिए आपकी छत कितनी बचत करा सकती है।"],
+  intro:["Upload one electricity bill. You'll see the estimated savings, what the subsidy covers and roughly when the system pays for itself, worked out from five years of real weather over your roof.",
+         "बस एक बिजली बिल अपलोड करें। अनुमानित बचत, सब्सिडी कितनी मिलेगी और सिस्टम की लागत लगभग कब तक वसूल होगी, सब दिखेगा। आपकी छत पर पिछले पाँच साल के असली मौसम के आधार पर।"],
+  dropT:["Upload your electricity bill","अपना बिजली बिल अपलोड करें"],
+  dropDesk:["Drop a photo or PDF here, or","फ़ोटो या PDF यहाँ छोड़ें, या"], dropMob:["Take a photo of the bill, or","बिल की फ़ोटो लें, या"],
+  choose:["choose a file","फ़ाइल चुनें"], dropH:["JPG, PNG, WEBP or PDF, up to 10 MB","JPG, PNG, WEBP या PDF, 10 MB तक"],
+  privacyA:["Your bill goes to Amazon Bedrock (AWS) only to read the numbers.","आपका बिल सिर्फ़ आँकड़े पढ़ने के लिए Amazon Bedrock (AWS) को जाता है।"],
+  privacyNoStore:["This server doesn't save the file.","यह सर्वर फ़ाइल सेव नहीं करता।"],
+  privacyStore:["A copy is kept in this service's private storage (Amazon S3).","इसकी एक कॉपी इस सेवा के निजी स्टोरेज (Amazon S3) में रखी जाती है।"],
+  privacyGps:["We'll ask for your location to find your city; you can say no.","शहर पता करने के लिए हम लोकेशन पूछेंगे; आप मना कर सकते हैं।"],
+  manualLink:["No bill handy? Enter your units and city","बिल पास नहीं? यूनिट और शहर खुद भरें"],
+  trust1:["Five years of hourly weather for your roof, not a national average","आपकी छत के लिए पाँच साल का घंटेवार मौसम, कोई राष्ट्रीय औसत नहीं"],
+  trust2:["Central and state subsidy rules, dated and linked to the official portals","केंद्र और राज्य सब्सिडी के नियम, तारीख़ और सरकारी पोर्टल के लिंक के साथ"],
+  trust3:["Every assumption listed, so you can check the numbers yourself","हर मान्यता लिखी हुई, ताकि आप आँकड़े खुद जाँच सकें"],
+  exTag:["Illustrative example, not your estimate","उदाहरण, आपका अनुमान नहीं"],
+  exWho:["A Delhi home using 512 units a month","दिल्ली का एक घर, 512 यूनिट हर महीने"],
+  exBigL:["value of the electricity a 3 kW roof would have made there in the last 12 months","3 kW की छत ने पिछले 12 महीनों में वहाँ जितनी बिजली बनाई होती, उसकी कीमत"],
+  exA:["6 panels","6 पैनल"], exB:["units in 12 months","यूनिट, 12 महीने में"], exC:["coal not burned a year","कोयला हर साल कम जला"],
+  exFoot:["Worked out by Surya Sahayak with real weather on 11 Oct 2026. Your report uses your own bill.","सूर्य सहायक ने 11 अक्टूबर 2026 को असली मौसम से निकाला। आपकी रिपोर्ट आपके अपने बिल से बनेगी।"],
+  // manual
+  manualH:["Enter your details","अपनी जानकारी भरें"],
+  manualP:["Use the numbers from any recent bill. Nothing is filled in for you, and you can change it later.","किसी भी हाल के बिल के आँकड़े भरें। हम अपनी ओर से कुछ नहीं भरते, और बाद में बदल भी सकते हैं।"],
+  unitsL:["Units used per month","हर महीने की खपत (यूनिट)"],
+  unitsHelp:["Printed as “Units consumed” or “kWh”. For a monthly average, add a few bills and divide.","बिल पर “Units consumed” या “kWh” लिखा होता है। औसत के लिए कुछ बिलों को जोड़कर भाग दें।"],
+  cityL:["City or 6-digit PIN code","शहर या 6 अंकों का पिन कोड"], cityHelp:["For example Pune, or 411005.","जैसे Pune या 411005।"],
+  stateL:["State","राज्य"], optional:["(optional)","(वैकल्पिक)"], stateHelp:["Leave it blank and we'll work it out from the city.","खाली छोड़ें तो हम शहर से पता कर लेंगे।"],
+  loadL:["Sanctioned load in kW","स्वीकृत भार (kW)"], loadHelp:["Printed as “Sanctioned load” or “Connected load”. It can limit the system size.","बिल पर “Sanctioned load” या “Connected load” लिखा होता है। इससे सिस्टम का साइज़ सीमित हो सकता है।"],
+  showPlan:["Show my estimate","मेरा अनुमान दिखाएं"], cancel:["Cancel","रद्द करें"],
+  eUnitsReq:["Enter how many units you use in a month.","महीने में कितनी यूनिट खर्च होती है, लिखें।"],
+  eUnitsRange:["Enter a number between 1 and 20,000.","1 से 20,000 के बीच कोई संख्या लिखें।"],
+  eCityReq:["Enter your city or PIN code.","अपना शहर या पिन कोड लिखें।"], ePin:["A PIN code has 6 digits, like 411005.","पिन कोड में 6 अंक होते हैं, जैसे 411005।"],
+  eLoad:["Enter a load between 0.5 and 100 kW, or leave it blank.","0.5 से 100 kW के बीच भार लिखें, या खाली छोड़ें।"],
+  fixAbove:["Please fix the highlighted fields.","कृपया लाल निशान वाले खाने ठीक करें।"],
+  // upload states
+  upUploading:(p)=>[`Uploading… ${p}%`,`अपलोड हो रहा है… ${p}%`],
+  upReading:["Reading your bill. This usually takes 5 to 15 seconds.","आपका बिल पढ़ा जा रहा है। आमतौर पर 5 से 15 सेकंड लगते हैं।"],
+  upDone:(u,d)=>[`Bill read: ${u} units a month${d ? `, ${d}` : ""}`,`बिल पढ़ लिया: ${u} यूनिट हर महीने${d ? `, ${d}` : ""}`],
+  upDoneNoUnits:["Bill read, but the units weren't clear. Type them below.","बिल पढ़ा, पर यूनिट साफ़ नहीं थीं। नीचे लिखें।"],
+  upErrType:["This file type isn't supported. Upload a JPG, PNG, WEBP or PDF.","यह फ़ाइल प्रकार नहीं चलता। JPG, PNG, WEBP या PDF अपलोड करें।"],
+  upErrHeic:["iPhone HEIC photos aren't supported. Take a screenshot of the photo and upload that, or set Camera › Formats to Most Compatible.","iPhone की HEIC फ़ोटो नहीं चलती। फ़ोटो का स्क्रीनशॉट अपलोड करें, या Camera › Formats में Most Compatible चुनें।"],
+  upErrSize:(mb)=>[`This file is ${mb} MB. The limit is 10 MB: try a phone photo instead of a scan.`,`यह फ़ाइल ${mb} MB की है। सीमा 10 MB है: स्कैन की जगह फ़ोन से फ़ोटो लें।`],
+  upErrRead:["We couldn't read this bill.","यह बिल पढ़ा नहीं जा सका।"],
+  upTips:["A sharp, flat photo of the whole first page works best.","पहले पेज की साफ़, सीधी, पूरी फ़ोटो सबसे अच्छी रहती है।"],
+  upRetry:["Choose another file","दूसरी फ़ाइल चुनें"],
+  progH:["Working out your estimate","आपका अनुमान निकाला जा रहा है"],
+  // needs
+  needUnitsT:["We couldn't read the units on your bill","बिल पर यूनिट पढ़ी नहीं जा सकीं"],
+  needUnitsP:["Type the number next to “Units consumed” or “kWh”. Everything else we read is kept.","“Units consumed” या “kWh” के आगे लिखी संख्या भरें। बाकी पढ़ी गई जानकारी रखी रहेगी।"],
+  needLocT:["Where is your home?","आपका घर कहाँ है?"],
+  needLocP:["We couldn't find your location from the bill or your device. Type your city or 6-digit PIN code.","बिल या आपके डिवाइस से लोकेशन नहीं मिली। शहर या 6 अंकों का पिन कोड लिखें।"],
+  needRead:(x)=>[`From your bill we read: ${x}.`,`आपके बिल से पढ़ा गया: ${x}।`],
+  cont:["Continue","आगे बढ़ें"],
+  p1:["Reading your bill","आपका बिल पढ़ रहे हैं"], p2:["Finding your city","आपका शहर ढूँढ रहे हैं"],
+  p3:["Replaying 5 years of weather over your roof","आपकी छत पर 5 साल का मौसम दोहरा रहे हैं"], p4:["Working out size, subsidy and savings","साइज़, सब्सिडी और बचत निकाल रहे हैं"],
+  pwait:["Waiting for your location permission…","आपकी लोकेशन की अनुमति का इंतज़ार…"], pwork:["Working…","काम जारी है…"],
+  billDone:(u,d)=>[`${u} units a month${d?`, ${d}`:""}`,`${u} यूनिट/माह${d?`, ${d}`:""}`],
+  billNoUnits:(d)=>[`Couldn't read the units${d ? `, ${d}` : ""}`,`यूनिट पढ़ नहीं पाए${d ? `, ${d}` : ""}`],
+  locDone:(l,s)=>[`${l} (${s})`,`${l} (${s})`],
+  genDone:(a,b)=>[`${a} to ${b}`,`${a} से ${b}`], planDone:(kw,n)=>[`${kw} kW, ${n} panels`,`${kw} kW, ${n} पैनल`],
+  src_gps:["from your device's GPS","आपके डिवाइस के GPS से"], src_bill:["from the address on your bill","बिल के पते से"],
+  src_ip:["approximate, from your network","नेटवर्क से अनुमानित"], src_manual:["as you entered","आपके डाले अनुसार"],
+  src_state_capital:["state capital, approximate","राज्य की राजधानी, अनुमानित"],
+  n_gps_differs_from_bill:(c)=>[`You seem to be in ${c}, but your bill is for another state. We used the bill's address: the roof is where the electricity connection is.`,
+                                `आप ${c} में लगते हैं, पर आपका बिल दूसरे राज्य का है। हमने बिल का पता लिया: छत वहीं है जहाँ बिजली का कनेक्शन है।`],
+  useGps:["Use my current location instead","इसके बजाय मेरी मौजूदा लोकेशन लें"],
+  n_gps_outside_india:["Your device location is outside India, so we used the address on your bill.","आपके डिवाइस की लोकेशन भारत से बाहर है, इसलिए बिल का पता लिया।"],
+  n_approximate_from_network:["We couldn't use GPS, so this city is approximate.","GPS का उपयोग नहीं हो सका, इसलिए यह शहर अनुमानित है।"],
+  n_state_capital_used:["We only know your state, so we used its capital for the weather.","हमें सिर्फ़ राज्य पता है, इसलिए मौसम के लिए राजधानी ली।"],
+  n_insecure:["GPS only works on a secure (https) page, so we used your bill instead.","GPS सिर्फ़ सुरक्षित (https) पेज पर चलता है, इसलिए बिल का उपयोग किया।"],
+  n_denied:["Location permission was off, so we used your bill instead.","लोकेशन की अनुमति बंद थी, इसलिए बिल का उपयोग किया।"],
+  n_bill_place_state_mismatch:["The PIN code on your bill and your electricity company point to different states. Please check the place above.","बिल का पिन कोड और आपकी बिजली कंपनी अलग-अलग राज्य दिखा रहे हैं। ऊपर दी जगह जाँच लें।"],
+  n_search_not_found:["We could not find the place you typed, so we used another source.","आपकी डाली जगह नहीं मिली, इसलिए दूसरे स्रोत से ली।"],
+  change:["Change place","जगह बदलें"], changePh:["City or PIN code","शहर या पिन कोड"],
+  fromBill:(u,l,d)=>[`Read from your bill: <b>${u} units a month</b>${l?`, ${l} kW sanctioned load`:""}${d?`, ${d}`:""}.`,`आपके बिल से: <b>${u} यूनिट/माह</b>${l?`, ${l} kW स्वीकृत भार`:""}${d?`, ${d}`:""}।`],
+  youEntered:(u,l,d)=>[`Based on <b>${u} units a month</b>${l?`, ${l} kW sanctioned load`:""}${d?`, ${d}`:""}.`,`<b>${u} यूनिट/माह</b>${l?`, ${l} kW स्वीकृत भार`:""}${d?`, ${d}`:""} के आधार पर।`],
+  edit:["Not right? Edit","सही नहीं? बदलें"], recalc:["Recalculate","फिर से निकालें"], tariffL:["Your average rate (₹ per unit)","आपकी औसत दर (₹ प्रति यूनिट)"],
+  startOver:["Start over","फिर से शुरू करें"],
+  // summary
+  sumL:["Estimated savings","अनुमानित बचत"], perYear:["a year","हर साल"],
+  sumSub:(m,b)=>[`About ${m} a month off an average bill of ${b}`,`औसत ${b} के बिल पर हर महीने लगभग ${m} कम`],
+  k_size:["Recommended system","सुझाया गया सिस्टम"], k_sizeS:(n,m2)=>[`${n} panels, about ${m2} m² of roof`,`${n} पैनल, लगभग ${m2} m² छत`],
+  k_cost:["Installation cost","लगाने की लागत"], k_costS:["estimate, before subsidy","अनुमान, सब्सिडी से पहले"],
+  k_sub:["Subsidy","सब्सिडी"], k_subC:["central (PM Surya Ghar)","केंद्र (PM सूर्य घर)"], k_subCS:(s)=>[`central + ${s}`,`केंद्र + ${s}`],
+  k_pay:["You pay","आप देंगे"], k_payS:["after subsidy","सब्सिडी के बाद"], k_payEmi:(e)=>[`after subsidy, or about ${e} a month on a loan`,`सब्सिडी के बाद, या लोन पर लगभग ${e} महीना`],
+  k_payFree:["the Delhi government pays the balance","बाकी रकम दिल्ली सरकार देती है"],
+  k_pb:["Approximate payback","लागत वसूली (लगभग)"], k_pbV:(a)=>[`About ${a} year${a === "1" ? "" : "s"}`,`लगभग ${a} साल`],
+  k_pbNone:["Nothing to recover","वसूलने को कुछ नहीं"], k_pbNoneS:["you pay nothing upfront","अग्रिम कुछ नहीं देना"],
+  k_pbNever:["Over 25 years","25 साल से ज़्यादा"], k_pbS:["tariff flat to +3% a year","टैरिफ़ स्थिर से +3% सालाना तक"],
+  k_gen:["Electricity a year","सालाना बिजली"], k_genV:(u)=>[`${u} units`,`${u} यूनिट`], k_genS:["in a typical year for your spot","आपकी जगह के आम साल में"],
+  alsoCoal:(v)=>[`Also about ${v} of coal not burned each year.`,`साथ ही हर साल लगभग ${v} कोयला कम जलेगा।`],
+  inclC:(c)=>[`Subsidy included: central ${c}.`,`शामिल सब्सिडी: केंद्र ${c}।`],
+  inclCS:(c,s,n)=>[`Subsidies included: central ${c} and ${n} ${s}.`,`शामिल सब्सिडी: केंद्र ${c} और ${n} ${s}।`],
+  notGuar:["Estimates at today's tariff and rules, not guaranteed returns.","आज के टैरिफ़ और नियमों पर अनुमान, पक्का रिटर्न नहीं।"],
+  tonnes:["t","टन"], kg:["kg","kg"], yrs:["yrs","साल"], day1:["Day 1","पहले दिन"],
+  // verify
+  vEye:["Before you install","लगवाने से पहले"], vH:["Check these before you pay anyone","किसी को भी पैसे देने से पहले ये जाँचें"],
+  v1T:["Your subsidy","आपकी सब्सिडी"], v1:(d)=>[`Confirm the amount on pmsuryaghar.gov.in (and solar.delhi.gov.in in Delhi). The rules here are as of ${d}.`,`राशि pmsuryaghar.gov.in (दिल्ली में solar.delhi.gov.in) पर पक्की करें। यहाँ के नियम ${d} तक के हैं।`],
+  v2T:["A registered vendor and DCR panels","पंजीकृत विक्रेता और DCR पैनल"], v2:["Without both, the central subsidy is lost. Get “DCR modules” written on the quote.","दोनों के बिना केंद्र सब्सिडी नहीं मिलती। कोटेशन पर “DCR modules” लिखवाएं।"],
+  v3T:["A site survey","छत का सर्वे"], v3:["Shade, the roof's direction and its strength decide the real output and whether the system fits.","छाया, छत की दिशा और मज़बूती से ही असली उत्पादन और जगह तय होती है।"],
+  v4T:["A net meter","नेट मीटर"], v4:["Applied for through the portal and fitted by your electricity company. These savings assume you have one.","पोर्टल से आवेदन, और बिजली कंपनी लगाती है। ये बचत नेट मीटर मानकर हैं।"],
+  // history
+  hEye:["What your roof would have earned","आपकी छत ने कितना कमाया होता"],
+  hH:(kw)=>[`If a ${kw} kW system had been on your roof`,`अगर आपकी छत पर ${kw} kW का सिस्टम होता`],
+  h12:["Last 12 months","पिछले 12 महीने"], h60:["Last 5 years","पिछले 5 साल"],
+  units_:["units","यूनिट"], earned:["of electricity, worth","बिजली, जिसकी कीमत"],
+  vsTyp:(p)=>p>=0?[`${p}% sunnier than a typical year`,`आम साल से ${p}% ज़्यादा धूप`]:[`${-p}% cloudier than a typical year`,`आम साल से ${-p}% कम धूप`],
+  bestM:(m,k)=>[`Best month: ${m} (${k} units)`,`सबसे अच्छा महीना: ${m} (${k} यूनिट)`], worstM:(m,k)=>[`weakest: ${m} (${k} units)`,`सबसे कमज़ोर: ${m} (${k} यूनिट)`],
+  hCap:(kw,tilt)=>[`Real weather replayed over a ${kw} kW south-facing roof tilted ${tilt}°. Valued at today's tariff and your average monthly use, so the rupee figures are what the same system would earn at today's prices.`,
+                   `${kw} kW की दक्षिणमुखी छत (झुकाव ${tilt}°) पर असली मौसम दोहराया गया। आज के टैरिफ़ और आपकी औसत खपत पर मूल्य लगाया है, यानी आज के दामों पर उतनी ही कमाई।`],
+  hCal:["Anchored to PVGIS's long-term average for your spot.","आपकी जगह के लिए PVGIS के दीर्घकालिक औसत से मिलाया गया।"],
+  hTyp:["Live weather history couldn't be reached, so this is a typical year, not the real past.","पिछले मौसम का डेटा नहीं मिल सका, इसलिए यह आम साल है, असली अतीत नहीं।"],
+  liveH:(c)=>[`Right now in ${c}`,`अभी ${c} में`],
+  liveTxt:(t,sky,w,so,fc)=>[`${t}°C, ${sky}. Your roof would be making ${w} right now. Today so far: ${so} units (forecast ${fc}).`,
+                            `${t}°C, ${sky}। अभी आपकी छत ${w} बना रही होती। आज अब तक: ${so} यूनिट (अनुमान ${fc})।`],
+  liveNight:["It's night: the panels are resting.","रात है: पैनल आराम कर रहे हैं।"],
+  sky_clear:["clear sky","साफ़ आसमान"], sky_partly_cloudy:["partly cloudy","आंशिक बादल"], sky_cloudy:["cloudy","बादल"],
+  // per panel
+  pEye:["Every panel, in rupees","हर पैनल, रुपयों में"],
+  pH:(n,w)=>[`${n} panels of ${w} W`,`${w} W के ${n} पैनल`],
+  pLead:(a)=>[`Each panel covers about ${a} m² of roof.`,`हर पैनल लगभग ${a} m² छत घेरता है।`],
+  pA:["each panel earns a year","हर पैनल की सालाना कमाई"], pB:["a month","हर महीने"], pC:["a day","हर दिन"],
+  pD:["per m² of panel a year","प्रति m² पैनल, सालाना"], pE:["units per panel a year","यूनिट प्रति पैनल, सालाना"],
+  lH:["What each extra kW buys","हर अतिरिक्त kW से क्या मिलता है"],
+  lh1:["Size","साइज़"], lh2:["You pay","आप देंगे"], lh3:["Saves a year","सालाना बचत"], lh4:["Pays back","वसूली"], lh5:["The extra panels","अतिरिक्त पैनल"],
+  best:["Best value","सबसे फ़ायदेमंद"], yourPick:["Your choice","आपकी पसंद"], seeThis:["See this size","यह साइज़ देखें"], backRec:["Back to recommended","सुझाए साइज़ पर लौटें"],
+  exFirst:(p)=>[`First ${p} panels`,`पहले ${p} पैनल`],
+  ex:(p,c,s,y)=>[`<b>+${p} panel${p === 1 ? "" : "s"}</b> cost <span class="nb">+${c}</span>, save <span class="nb">+${s}/yr</span>, pay back in ${y}`,
+                 `<b>+${p} पैनल</b>: लागत <span class="nb">+${c}</span>, बचत <span class="nb">+${s}/साल</span>, वसूली ${y}`],
+  ex0:["no extra cost","कोई अतिरिक्त खर्च नहीं"], noSub:["no extra subsidy","कोई अतिरिक्त सब्सिडी नहीं"], panelsW:["panels","पैनल"],
+  whyPay:(max,kw,y)=>[`Your bill could use up to ${max} kW, but the extra panels beyond ${kw} kW take about ${y} years to pay back, so we stopped at ${kw} kW. Pick a bigger size below if you plan to add an AC or an EV.`,
+                      `आपका बिल ${max} kW तक का सिस्टम खपा सकता है, पर ${kw} kW से ऊपर के पैनल लागत वसूलने में लगभग ${y} साल लेते हैं, इसलिए हम ${kw} kW पर रुके। AC या EV लेने की योजना हो तो नीचे बड़ा साइज़ चुनें।`],
+  whyOther:{consumption:["Sized to your yearly usage.","आपकी सालाना खपत के हिसाब से साइज़।"], roof:["Limited by your roof space.","छत की जगह से सीमित।"],
+            sanctioned_load:["Limited by your sanctioned load.","स्वीकृत भार से सीमित।"], system_cap:["Capped at 10 kW for homes.","घर के लिए 10 kW की सीमा।"]},
+  // breakeven
+  bEye:["Investment and cumulative savings","निवेश और कुल बचत"],
+  bFree:(a)=>[`Free after ${a} year${a === "1" ? "" : "s"}`,`${a} साल बाद मुफ़्त`], bDay1:["Free from day one","पहले दिन से मुफ़्त"],
+  bLeft:(n)=>[`Then about ${n} more year${n === 1 ? "" : "s"} of free electricity from your roof.`,`उसके बाद लगभग ${n} और साल छत से मुफ़्त बिजली।`],
+  bHere:(y)=>[`Break-even, year ${y}`,`वसूली, साल ${y}`],
+  bDay1T:["Under the ₹0-upfront scheme you pay nothing now, so every unit your roof makes is yours.","₹0 अग्रिम योजना में आप अभी कुछ नहीं देते, इसलिए छत की हर यूनिट आपकी है।"],
+  bRead:["The line starts below zero at what you pay upfront and climbs as savings add up, after the inverter replacement and upkeep. Where it crosses zero, you've recovered your cost.","रेखा शुरू में शून्य से नीचे है (आपकी अग्रिम लागत), और बचत जुड़ने के साथ ऊपर जाती है, इन्वर्टर बदलने और रखरखाव का खर्च घटाकर। जहाँ यह शून्य पार करती है, वहाँ लागत वसूल।"],
+  bFlat:["Tariff stays flat","टैरिफ़ वही रहे"], bGrow:["Tariff grows 3% a year","टैरिफ़ हर साल 3% बढ़े"],
+  bGain:(a,b)=>[`25-year net gain: ${a} to ${b}`,`25 साल का शुद्ध लाभ: ${a} से ${b}`],
+  bNever:["Not within 25 years at today's numbers.","आज के आँकड़ों पर 25 साल में वसूली नहीं।"],
+  bAssume:["What this assumes","यह किन बातों पर आधारित है"], yearAxis:["years after installation","लगने के बाद के साल"], yAxis:["Cumulative position","कुल स्थिति"],
+  // impact
+  iEye:["What your roof saves the planet","आपकी छत धरती को क्या बचाती है"],
+  i12:["12 months","12 महीने"], i60:["5 years","5 साल"], i25:["25 years","25 साल"],
+  iH:["Every unit from your roof is a unit a mostly-coal grid doesn't generate.","छत की हर यूनिट वह यूनिट है जो ज़्यादातर कोयले वाली ग्रिड को नहीं बनानी पड़ती।"],
+  iCoal:["of coal not burned","कोयला नहीं जला"], iPetrol:(km)=>[`of petrol: the same CO₂ as driving about ${km} km in a petrol car`,`पेट्रोल: उतनी ही CO₂ जितनी पेट्रोल कार में लगभग ${km} km चलने से निकलती है`],
+  iCo2:["of CO₂ kept out of the air","CO₂ हवा में नहीं गई"], iSo2:["SO₂ (acid rain, smog)","SO₂ (अम्लीय वर्षा, स्मॉग)"], iNox:["NOx (smog, asthma)","NOx (स्मॉग, दमा)"],
+  iPm:["PM2.5 (fine dust in lungs)","PM2.5 (फेफड़ों में जाने वाली महीन धूल)"], iAsh:["of fly ash not dumped","फ्लाई ऐश नहीं बनी"],
+  iWater:["of water not used by power plants","बिजलीघरों का पानी बचा"], iTrees:["trees' worth of CO₂ absorption for a year","पेड़ों के एक साल के बराबर CO₂ सोखना"],
+  iNote:["Estimates for the average Indian grid unit, give or take 20–30%. Petrol is a CO₂ equivalent, not petrol your household would have burned.",
+         "भारतीय ग्रिड की औसत यूनिट के अनुमान, 20–30% ऊपर-नीचे हो सकते हैं। पेट्रोल CO₂ का समतुल्य है, आपके घर का जलाया पेट्रोल नहीं।"],
+  iHow:["How we calculated this","यह कैसे निकाला"],
+  iM1:(g,l,n)=>[`CO₂: ${g} kg per unit (grid average) minus ${l} kg (the panel's own manufacturing) = ${n} kg`,`CO₂: ${g} kg प्रति यूनिट (ग्रिड औसत) में से ${l} kg (पैनल बनाने का) घटाकर = ${n} kg`],
+  iM2:(c,s,n,p,a,w)=>[`Per unit: coal ${c} kg, SO₂ ${s} g, NOx ${n} g, PM2.5 ${p} g, ash ${a} kg, water ${w} L`,`प्रति यूनिट: कोयला ${c} kg, SO₂ ${s} g, NOx ${n} g, PM2.5 ${p} g, राख ${a} kg, पानी ${w} L`],
+  iM3:(pk,km,tr)=>[`Petrol: ${pk} kg CO₂ per litre; car ${km} km/L. Tree: ${tr} kg CO₂ a year.`,`पेट्रोल: ${pk} kg CO₂ प्रति लीटर; कार ${km} km/L। पेड़: ${tr} kg CO₂ सालाना।`],
+  // subsidy
+  sEye:["Your subsidy","आपकी सब्सिडी"], sH:["Where the money comes from","पैसा कहाँ से आता है"],
+  gross:["System price (estimate)","सिस्टम की कीमत (अनुमान)"], central:["Central subsidy (PM Surya Ghar)","केंद्र सब्सिडी (PM सूर्य घर)"],
+  stateSub:["Delhi subsidy","दिल्ली सब्सिडी"], youPay:["Your cost","आपकी लागत"], freeTop:["Delhi government pays the balance","बाकी रकम दिल्ली सरकार देगी"],
+  loan:["Loan and EMI","लोन और EMI"], perMonth:["/month","/माह"], delhiName:["Delhi","दिल्ली"],
+  tl0:(a)=>[`Day 0: you pay ${a}`,`पहले दिन: आप ${a} देंगे`], tl0s:["to the vendor, after the upfront subsidy","विक्रेता को, अग्रिम सब्सिडी घटाकर"],
+  tl1:(a)=>[`About 30–45 days later: ${a} comes back`,`लगभग 30–45 दिन बाद: ${a} वापस आएंगे`], tl1s:["central subsidy, credited to your bank by DBT","केंद्र सब्सिडी, DBT से आपके बैंक में"],
+  tlFree:["Nothing to pay","कुछ भी नहीं देना"], tlFreeS:["Zero upfront through the government-selected vendor.","सरकार द्वारा चुने विक्रेता के ज़रिये अग्रिम शून्य।"],
+  delhiNote:["Delhi's cabinet approved this scheme on 2 Sep 2026. Guidelines and the vendor list were still being notified, so confirm the details on solar.delhi.gov.in before you pay anyone.","दिल्ली कैबिनेट ने यह योजना 2 सितंबर 2026 को मंज़ूर की। दिशानिर्देश और विक्रेता सूची तब तक अधिसूचित हो रही थीं, इसलिए किसी को भुगतान से पहले solar.delhi.gov.in पर जाँच लें।"],
+  delhiAbove:(amt,lim)=>[`The announcement spells out Delhi's ₹${amt} only for homes up to ${lim} units a month. We count it for your home too, but treat it as unconfirmed.`,`घोषणा में दिल्ली की ₹${amt} सब्सिडी सिर्फ़ ${lim} यूनिट/माह तक के घरों के लिए साफ़ लिखी है। हमने इसे आपके घर के लिए भी गिना है, पर इसे अपुष्ट मानें।`],
+  ceil:["Central subsidy stops growing at 3 kW: every kW above that is unsubsidised.","केंद्र सब्सिडी 3 kW पर रुक जाती है: उससे ऊपर के हर kW पर कोई सब्सिडी नहीं।"],
+  freeYes:(u)=>[`You qualify for the ₹0-upfront scheme (homes averaging ${u} units a month or less).`,`आप ₹0 अग्रिम योजना के पात्र हैं (औसत ${u} यूनिट/माह या कम वाले घर)।`],
+  freeNo:(lim,u)=>[`Homes averaging ${lim} units a month or less get 3 kW at ₹0 upfront. Yours averages ${u}.`,`औसत ${lim} यूनिट/माह या कम वाले घरों को 3 kW ₹0 अग्रिम पर मिलता है। आपका औसत ${u} है।`],
+  topup:(ag,amt)=>[`Possible extra: ${ag} reports up to ${amt}. Not counted above, because it isn't confirmed. Check with them.`,`संभावित अतिरिक्त: ${ag} के अनुसार ${amt} तक। ऊपर नहीं जोड़ा, क्योंकि पुष्टि नहीं है। उनसे जाँच लें।`],
+  conds:["Conditions to keep the subsidy","सब्सिडी बनाए रखने की शर्तें"], docs:["Documents to apply","आवेदन के लिए दस्तावेज़"],
+  assumptions:["What these numbers assume","ये आँकड़े किन बातों पर आधारित हैं"], asof:(d)=>[`Rules as of ${d}.`,`नियम ${d} तक के।`],
+  // roof
+  roofEye:["Optional check","वैकल्पिक जाँच"], roofH:["Will it fit on your roof?","क्या यह आपकी छत पर आएगा?"],
+  roofLead:(kw,m2)=>[`A ${kw} kW system needs about ${m2} m² of shade-free roof, counting walkways and gaps at the edges.`,`${kw} kW के सिस्टम को लगभग ${m2} m² बिना छाया वाली छत चाहिए, रास्ते और किनारों की जगह मिलाकर।`],
+  roofOpen:["Measure your roof on the satellite map","सैटेलाइट मैप पर अपनी छत नापें"],
+  r1:["Find your house: type the address and press Find.","अपना घर ढूँढें: पता लिखें और ढूंढें दबाएं।"],
+  r2:["Tap each corner of the open roof where panels could go. Leave out the tank and stair room.","खुली छत के हर कोने पर टैप करें जहाँ पैनल लग सकते हैं। टंकी और सीढ़ी वाला कमरा छोड़ दें।"],
+  r3:["Press Recalculate. The plan is resized to what fits.","फिर से निकालें दबाएं। प्लान उतने साइज़ का हो जाएगा जितना छत पर आए।"],
+  addrL:["Address","पता"], find:["Find","ढूंढें"], area:["Roof area","छत का क्षेत्रफल"], undo:["Undo last corner","आख़िरी कोना हटाएं"], clear:["Start again","फिर से शुरू"],
+  manualL:["Or type the open roof area (m²)","या खुली छत का क्षेत्रफल (m²) लिखें"], roofGo:["Recalculate with my roof","मेरी छत के साथ फिर निकालें"],
+  fits:(kw)=>[`(room for about ${kw} kW)`,`(लगभग ${kw} kW की जगह)`], needRoof:["Tap at least 3 roof corners, or type the area.","छत के कम से कम 3 कोने टैप करें, या क्षेत्रफल लिखें।"],
+  eArea:["Enter an area between 5 and 5,000 m².","5 से 5,000 m² के बीच क्षेत्रफल लिखें।"],
+  roofTooSmall:["That roof area is too small for a 1 kW system.","इतनी छत 1 kW के सिस्टम के लिए भी कम है।"],
+  roofCaveat:["Roof area is only one check. Shade from trees and buildings, which way the roof faces, its strength and access all need a site survey by a registered vendor before you sign.","छत का क्षेत्रफल सिर्फ़ एक जाँच है। पेड़ों-इमारतों की छाया, छत की दिशा, मज़बूती और पहुँच के लिए साइन करने से पहले पंजीकृत विक्रेता से सर्वे ज़रूरी है।"],
+  addrPh:["House, street, area, city","मकान, गली, इलाका, शहर"],
+  mapFail:["The map could not load. Type the roof area instead.","मैप लोड नहीं हुआ। छत का क्षेत्रफल खुद लिखें।"],
+  // quote
+  qEye:["Vendor quote check","विक्रेता कोटेशन जाँच"], s4h:["Before you sign, know what you're paying for.","साइन करने से पहले जानिए कि आप किस चीज़ के पैसे दे रहे हैं।"],
+  s4p:["Upload or paste a vendor's quotation. We compare its price per kW with typical market rates and list what to clarify before you pay. It's a checklist to help you ask better questions, not a legal or subsidy approval.",
+       "विक्रेता का कोटेशन अपलोड या पेस्ट करें। हम प्रति kW कीमत की तुलना सामान्य बाज़ार दर से करते हैं और बताते हैं कि भुगतान से पहले क्या साफ़ करवाएं। यह बेहतर सवाल पूछने की चेकलिस्ट है, कोई कानूनी या सब्सिडी मंज़ूरी नहीं।"],
+  qUpload:["Upload the quote","कोटेशन अपलोड करें"], qPaste:["Paste its text","टेक्स्ट पेस्ट करें"], qPick:["Choose the quotation","कोटेशन चुनें"],
+  qHint:["Photo, PDF or .txt, up to 10 MB","फ़ोटो, PDF या .txt, 10 MB तक"], qCheck:["Check this quote","कोटेशन जाँचें"], qPh:["Paste the full quotation here","पूरा कोटेशन यहाँ पेस्ट करें"],
+  checking:["Checking the quote. This takes 10 to 20 seconds for a photo.","कोटेशन जाँच रहे हैं। फ़ोटो के लिए 10 से 20 सेकंड लगते हैं।"], needQuote:["Paste the full quote text first.","पहले पूरा कोटेशन टेक्स्ट पेस्ट करें।"],
+  v_fair:["Price in the typical range","कीमत सामान्य दायरे में"], v_overpriced:["Priced above the typical range","कीमत सामान्य से ज़्यादा"], v_suspiciously_low:["Priced well below the market","कीमत बाज़ार से बहुत कम"], v_unknown:["Price not found","कीमत नहीं मिली"],
+  riskSub:["Subsidy could be at risk","सब्सिडी ख़तरे में हो सकती है"], overpay:["Possible overpayment","संभावित ज़्यादा भुगतान"], askVendor:["Ask:","पूछें:"],
+  qgPrice:["Price","कीमत"], qgSub:["Could affect your subsidy","सब्सिडी पर असर डाल सकता है"], qgAsk:["Clarify with the vendor","विक्रेता से साफ़ करवाएं"], qgOk:["Looks fine","ठीक दिखता है"],
+  qRead:["Figures were read from your document automatically. Check they match the quote.","आँकड़े आपके दस्तावेज़ से अपने-आप पढ़े गए। कोटेशन से मिलान कर लें।"],
+  qVendor:(v)=>[`Vendor: ${v}`,`विक्रेता: ${v}`], qSize:(k)=>[`${k} kW`,`${k} kW`],
+  f_price_high:(p)=>[[`Price ${rupee(p.per_kw)}/kW is above the typical range ${rupee(p.lo)}–${rupee(p.hi)}/kW for about ${p.bucket} kW systems.`,`Ask for a revised quote near ${rupee(p.target)}, or an itemised price.`],
+                     [`कीमत ${rupee(p.per_kw)}/kW है, जो लगभग ${p.bucket} kW सिस्टम की सामान्य दर ${rupee(p.lo)}–${rupee(p.hi)}/kW से ज़्यादा है।`,`${rupee(p.target)} के आसपास नया कोटेशन या मदवार कीमत माँगें।`]],
+  f_price_low:(p)=>[[`Price ${rupee(p.per_kw)}/kW is well below the market. Check for imported (non-DCR) panels, a thin structure or a missing net meter.`,`Ask for the panel make, DCR certificate and structure details in writing.`],
+                    [`कीमत ${rupee(p.per_kw)}/kW बाज़ार से बहुत कम है। आयातित (non-DCR) पैनल, कमज़ोर स्ट्रक्चर या नेट मीटर न होने की जाँच करें।`,`पैनल का ब्रांड, DCR प्रमाणपत्र और स्ट्रक्चर का विवरण लिखित में माँगें।`]],
+  f_no_size_price:()=>[[`We couldn't find the system size and total price on the quote.`,`Ask for the kW size and an all-inclusive price (with GST) in writing.`],
+                       [`कोटेशन पर सिस्टम का साइज़ और कुल कीमत नहीं मिली।`,`kW साइज़ और GST सहित पूरी कीमत लिखित में माँगें।`]],
+  f_no_dcr:()=>[[`The quote doesn't say the panels are DCR (made in India). Non-DCR panels make you ineligible for the central subsidy.`,`Get “DCR modules” and the panel make and model written on the quote.`],
+                [`कोटेशन में नहीं लिखा कि पैनल DCR (भारत में बने) हैं। non-DCR पैनल पर केंद्र सब्सिडी नहीं मिलती।`,`कोटेशन पर “DCR modules” और पैनल का ब्रांड-मॉडल लिखवाएं।`]],
+  f_no_vendor_reg:()=>[[`No sign that the vendor is registered on the PM Surya Ghar portal.`,`Ask for their registration ID and check it on pmsuryaghar.gov.in.`],
+                       [`विक्रेता के PM सूर्य घर पोर्टल पर पंजीकृत होने का कोई ज़िक्र नहीं।`,`उनका पंजीकरण नंबर माँगें और pmsuryaghar.gov.in पर जाँचें।`]],
+  f_missing_item:(p)=>[[`Not mentioned: ${itemName(p.item)}.`,`Confirm the price includes the ${itemName(p.item)}, at no extra cost.`],
+                       [`ज़िक्र नहीं: ${itemName(p.item)}।`,`पक्का करें कि ${itemName(p.item)} बिना अतिरिक्त खर्च के शामिल है।`]],
+  f_size_mismatch:(p)=>[[`The quote is for ${p.kw} kW; your bill and roof suggest ${p.rec} kW.`,`Ask why this size. Above 3 kW there is no extra central subsidy.`],
+                        [`कोटेशन ${p.kw} kW का है; आपके बिल और छत के हिसाब से ${p.rec} kW ठीक है।`,`यह साइज़ क्यों, पूछें। 3 kW से ऊपर केंद्र सब्सिडी नहीं बढ़ती।`]],
+  f_gst_excluded:()=>[[`The price may not include GST.`,`Ask for the final price including GST.`],[`कीमत में शायद GST शामिल नहीं।`,`GST सहित अंतिम कीमत माँगें।`]],
+  o_price_fair:(p)=>[`Price ${rupee(p.per_kw)}/kW is within the typical range ${rupee(p.lo)}–${rupee(p.hi)}/kW`,`कीमत ${rupee(p.per_kw)}/kW, सामान्य दायरे ${rupee(p.lo)}–${rupee(p.hi)}/kW में है`],
+  o_dcr_ok:["Panels stated as DCR (made in India)","पैनल DCR (भारत में बने) लिखे हैं"], o_vendor_ok:["Vendor registration or the scheme is mentioned","विक्रेता पंजीकरण या योजना का ज़िक्र है"],
+  items:{panels:["panels","पैनल"], panel_make_and_wattage:["panel make and wattage","पैनल का ब्रांड और वाट"], inverter:["inverter","इन्वर्टर"],
+         mounting_structure:["mounting structure","माउंटिंग स्ट्रक्चर"], cabling_and_acdb_dcdb:["cabling and ACDB/DCDB boxes","केबल और ACDB/DCDB बॉक्स"],
+         earthing_and_lightning_arrestor:["earthing and lightning arrester","अर्थिंग और लाइटनिंग अरेस्टर"], net_meter:["net meter","नेट मीटर"],
+         installation_and_commissioning:["installation and commissioning","इंस्टॉलेशन और चालू करना"], warranty:["warranty","वारंटी"], subsidy_paperwork:["subsidy paperwork","सब्सिडी के कागज़ात"]},
+  // chat
+  askEye:["Ask about your estimate","अपने अनुमान के बारे में पूछें"], s5h:["Questions about your numbers?","अपने आँकड़ों पर सवाल?"],
+  s5p:["Ask in English or Hindi. Answers use the numbers in your report.","हिंदी या अंग्रेज़ी में पूछें। जवाब आपकी रिपोर्ट के आँकड़ों से।"],
+  ask:["Ask","पूछें"], chatPh:["e.g. What affects my payback period?","जैसे: मेरी लागत वसूली किन बातों पर निर्भर है?"],
+  disclaim:["Answers explain this estimate. They are not an official subsidy approval or installation advice.","जवाब इस अनुमान को समझाते हैं। ये सब्सिडी की आधिकारिक मंज़ूरी या इंस्टॉलेशन सलाह नहीं हैं।"],
+  chatErr:["The answer couldn't be loaded.","जवाब लोड नहीं हो सका।"], retry:["Try again","फिर कोशिश करें"],
+  q1:["What affects my payback period?","मेरी लागत वसूली किन बातों पर निर्भर है?"], q2:["Which subsidy assumptions were used?","सब्सिडी के लिए क्या माना गया है?"],
+  q3:["How much coal does my roof save?","मेरी छत कितना कोयला बचाएगी?"], q4:["What should I check in a vendor's quote?","विक्रेता के कोटेशन में क्या जाँचूँ?"],
+  // how + footer
+  howH:["How the estimate is made","अनुमान कैसे बनता है"],
+  howP:["Three steps, all shown in your report. The language model only reads your bill and answers questions; the arithmetic is ordinary code you can check.","तीन चरण, सब आपकी रिपोर्ट में दिखते हैं। AI मॉडल सिर्फ़ बिल पढ़ता है और सवालों के जवाब देता है; सारा हिसाब साधारण कोड से होता है जिसे जाँचा जा सकता है।"],
+  how1T:["Read the bill","बिल पढ़ना"], how1:["Amazon Bedrock reads the units, sanctioned load, electricity company and PIN code. If anything is unclear, we ask you instead of guessing.","Amazon Bedrock यूनिट, स्वीकृत भार, बिजली कंपनी और पिन कोड पढ़ता है। कुछ साफ़ न हो तो हम अंदाज़ा नहीं लगाते, आपसे पूछते हैं।"],
+  how2T:["Replay the weather","मौसम दोहराना"], how2:["Five years of hourly sunshine and temperature for your spot (Open-Meteo, ERA5) show what a south-facing roof would have produced, checked against PVGIS's long-term average.","आपकी जगह की पाँच साल की घंटेवार धूप और तापमान (Open-Meteo, ERA5) से पता चलता है कि दक्षिणमुखी छत कितना बनाती, PVGIS के दीर्घकालिक औसत से मिलाकर।"],
+  how3T:["Apply today's rules and prices","आज के नियम और दाम लगाना"], how3:["Central and state subsidies, typical installed prices, your tariff and a 25-year cash flow give the savings and the payback range.","केंद्र और राज्य सब्सिडी, आम लागत, आपका टैरिफ़ और 25 साल का नकद प्रवाह मिलकर बचत और वसूली का दायरा बताते हैं।"],
+  hf1T:["What we use","हम क्या लेते हैं"], hf1:["Units, sanctioned load, electricity company, and the PIN code or city. Your approximate location, if you allow it.","यूनिट, स्वीकृत भार, बिजली कंपनी, और पिन कोड या शहर। आपकी अनुमति हो तो अनुमानित लोकेशन।"],
+  hf2T:["What stays out","क्या बाहर रहता है"], hf2:["Your name and account number aren't used in the calculations, and weather or map services never receive them.","आपका नाम और खाता नंबर हिसाब में इस्तेमाल नहीं होते, और मौसम या मैप सेवाओं को कभी नहीं भेजे जाते।"],
+  hf3T:["What to confirm","क्या पक्का करें"], hf3:["Subsidy amounts, prices and payback are estimates. Confirm them on pmsuryaghar.gov.in and with a registered vendor.","सब्सिडी, कीमतें और वसूली अनुमान हैं। pmsuryaghar.gov.in पर और पंजीकृत विक्रेता से पक्का करें।"],
+  foot:["Estimates, not a sanction or a guaranteed return. Subsidy rules change: confirm on <a href=\"https://pmsuryaghar.gov.in\" target=\"_blank\" rel=\"noopener\">pmsuryaghar.gov.in</a> and <a href=\"https://solar.delhi.gov.in\" target=\"_blank\" rel=\"noopener\">solar.delhi.gov.in</a>.","ये अनुमान हैं, कोई मंज़ूरी या पक्का रिटर्न नहीं। सब्सिडी नियम बदलते रहते हैं: <a href=\"https://pmsuryaghar.gov.in\" target=\"_blank\" rel=\"noopener\">pmsuryaghar.gov.in</a> और <a href=\"https://solar.delhi.gov.in\" target=\"_blank\" rel=\"noopener\">solar.delhi.gov.in</a> पर पुष्टि करें।"],
+  builtline:["Your bill is read with Amazon Bedrock. Weather and map services only see an approximate location (about 1 km), or your PIN code or city, never your name, bill number or street address. With no GPS and no address on the bill, your network address is used once to guess the city.",
+              "आपका बिल Amazon Bedrock से पढ़ा जाता है। मौसम और मैप सेवाओं को सिर्फ़ अनुमानित लोकेशन (लगभग 1 km) या पिन कोड/शहर जाता है, आपका नाम, बिल नंबर या गली का पता कभी नहीं। GPS और बिल का पता न हो तो शहर का अंदाज़ा एक बार नेटवर्क पते से लगाया जाता है।"],
+  // errors + warnings
+  err_generic:["Something went wrong. Please try again.","कुछ गड़बड़ हुई। फिर कोशिश करें।"], needUnitsErr:["Enter your monthly units first.","पहले महीने की यूनिट लिखें।"],
+  needCityErr:["Enter a city or PIN code.","शहर या पिन कोड लिखें।"], notFound:["We couldn't find that place. Try the 6-digit PIN code.","वह जगह नहीं मिली। 6 अंकों का पिन कोड आज़माएं।"],
+  netErr:["Couldn't reach the server. Check your connection and try again.","सर्वर तक नहीं पहुँच सके। इंटरनेट जाँचकर फिर कोशिश करें।"],
+  w_weather_down:["Past-weather data couldn't be reached right now, so you're seeing a typical year instead of the real past 1 and 5 years.","पिछले मौसम का डेटा अभी नहीं मिल सका, इसलिए असली पिछले 1 और 5 साल की जगह आम साल दिख रहा है।"],
+  w_pvgis_down:["The PVGIS solar service was unreachable; yield uses the 5-year weather average.","PVGIS सोलर सेवा नहीं मिली; उत्पादन 5 साल के मौसम औसत से निकाला।"],
+  w_no_solar_data:["No live solar data was reachable, so numbers use a generic North-India profile and are rough.","कोई लाइव सोलर डेटा नहीं मिला, इसलिए उत्तर भारत की सामान्य प्रोफ़ाइल से मोटे आँकड़े हैं।"],
+  w_tariff_assumed:["Your bill's rate wasn't readable, so we assumed ₹7 per unit.","बिल की दर पढ़ी नहीं गई, इसलिए ₹7 प्रति यूनिट माना।"],
+  w_no_state:["We couldn't tell your state, so only the central subsidy is counted.","राज्य पता नहीं चला, इसलिए सिर्फ़ केंद्र सब्सिडी गिनी है।"],
+  w_weather_vs_pvgis_gap:["The weather record and the PVGIS average differ a lot here, so results are anchored to PVGIS.","यहाँ मौसम रिकॉर्ड और PVGIS औसत में काफ़ी अंतर है, इसलिए नतीजे PVGIS से मिलाए गए हैं।"],
+  w_yield_out_of_band:["The yield estimate is outside the usual range for India. Treat these numbers with care.","उत्पादन का अनुमान भारत के सामान्य दायरे से बाहर है। इन आँकड़ों को सावधानी से लें।"],
+  mo:[["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],["जन","फ़र","मार्च","अप्रै","मई","जून","जुला","अग","सित","अक्टू","नव","दिस"]]
+};
+const L_ = () => (S.lang === "hi" ? 1 : 0);
+const t = (k, ...a) => {
+  const v = TX[k];
+  if (v === undefined) { console.error("missing i18n", k); return k; }
+  const r = typeof v === "function" ? v(...a) : v;
+  return Array.isArray(r) ? r[L_()] : r;
+};
+const itemName = (k) => (TX.items[k] ? TX.items[k][L_()] : String(k).replace(/_/g, " "));
+function applyLang(){
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  document.querySelectorAll("[data-t]").forEach(el => { if (TX[el.dataset.t] && typeof TX[el.dataset.t] !== "function") el.innerHTML = t(el.dataset.t); });
+  document.querySelectorAll("[data-tp]").forEach(el => { if (TX[el.dataset.tp]) el.placeholder = t(el.dataset.tp); });
+  renderPrivacy();
+}
+function setLang(l){
+  S.lang = l; applyLang();
+  renderProgress(); if (S.report) renderReport(); renderRoofLead(); renderSuggest(); updateArea(); renderUp();
+  if (S.quote) renderQuote(S.quote);
+  if (!$("needs").classList.contains("hidden")) renderNeedRead();
+  clearFieldErrors();
+  try { localStorage.setItem("surya_lang", l); } catch(e){}
+}
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+/* ====================================================================== helpers */
+const rupee = (n) => (n < 0 ? "−" : "") + "₹" + Math.round(Math.abs(n)).toLocaleString("en-IN");
+const num = (n) => Math.round(n).toLocaleString("en-IN");
+function short(n){
+  const a = Math.abs(n), s = n < 0 ? "−" : "", hi = S.lang === "hi";
+  if (a >= 1e7) return s + "₹" + (a/1e7).toFixed(2).replace(/\.?0+$/,"") + (hi ? " करोड़" : " Cr");
+  if (a >= 1e5) return s + "₹" + (a/1e5).toFixed(1).replace(/\.0$/,"") + (hi ? " लाख" : " lakh");
+  if (a >= 1e3) return s + "₹" + (a/1e3).toFixed(a >= 1e4 ? 0 : 1).replace(/\.0$/,"") + (hi ? " हज़ार" : "k");
+  return s + "₹" + Math.round(a);
+}
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mon = (i) => TX.mo[L_()][i];
+function status(id, msg, kind){ const el = $(id); if (!el) return; el.className = "status" + (kind === "err" ? " err" : ""); el.innerHTML = kind === "busy" ? `<span class="spin"></span>${esc(msg)}` : esc(msg); }
+function errMsg(data, code){ let d = data && data.detail; if (Array.isArray(d)) d = d.map(x => x.msg).join("; "); return d || `Server error ${code}`; }
+async function call(path, opts){
+  let r;
+  try { r = await fetch(API + path, opts); } catch(e){ throw new Error(t("netErr")); }
+  let data = null; try { data = await r.json(); } catch(e){}
+  if (!r.ok) throw new Error(errMsg(data, r.status));
+  return data;
+}
+/* XHR (not fetch) for uploads, so the user sees real upload progress */
+function upload(path, fd, onProgress){
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open("POST", API + path);
+    x.upload.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(Math.round(100 * e.loaded / e.total)); };
+    x.upload.onload = () => onProgress && onProgress(100);
+    x.onload = () => { let data = null; try { data = JSON.parse(x.responseText); } catch(e){}
+                       if (x.status >= 200 && x.status < 300) resolve(data); else reject(new Error(errMsg(data, x.status))); };
+    x.onerror = () => reject(new Error(t("netErr")));
+    x.send(fd);
+  });
+}
+const post = (path, body) => call(path, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify(body) });
+function show(id, on){ $(id).classList.toggle("hidden", !on); }
+function scrollToEl(el){ el.scrollIntoView({ behavior: RM() ? "auto" : "smooth", block: "start" }); }
+function setProgress(p){ $("pfill").style.width = p + "%"; }
+function animateCounts(root){
+  root.querySelectorAll("[data-count]").forEach(el => {
+    const to = +el.dataset.count, kind = el.dataset.fmt;
+    const fmt = (n) => kind === "rupee" ? rupee(n) : kind === "dec" ? n.toFixed(1) : num(n);
+    if (RM() || !to){ el.textContent = fmt(to); return; }
+    const dur = 900, t0 = performance.now();
+    (function tick(now){ const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3); el.textContent = fmt(to*e); if (p<1) requestAnimationFrame(tick); })(performance.now());
+  });
+}
+function growBars(root){
+  requestAnimationFrame(() => requestAnimationFrame(() => root.querySelectorAll("[data-h]").forEach(b => b.style.height = b.dataset.h)));
+}
+const kgFmt = (kg) => kg >= 1000 ? { v:(kg/1000).toFixed(kg >= 10000 ? 1 : 2).replace(/\.?0+$/,""), u:"t" } : { v:num(kg), u:"kg" };
+const kgTxt = (kg) => { const k = kgFmt(kg); return `${k.v} ${k.u === "t" ? t("tonnes") : t("kg")}`; };
+
+/* ====================================================================== privacy line (true to how this server is set up) */
+function renderPrivacy(){
+  const el = $("privacyTxt"); if (!el) return;
+  const store = S.health ? " " + t(S.health.stores_uploads ? "privacyStore" : "privacyNoStore") : "";
+  el.textContent = t("privacyA") + store + " " + t("privacyGps");
+}
+
+/* ====================================================================== GPS */
+function getGps(){
+  return new Promise((resolve) => {
+    if (!window.isSecureContext || !navigator.geolocation){ S.gpsNote = "insecure"; return resolve(null); }
+    let done = false;
+    const finish = (v) => { if (!done){ done = true; resolve(v); } };
+    setTimeout(() => { if (!done){ S.gpsNote = "denied"; finish(null); } }, 25000);
+    navigator.geolocation.getCurrentPosition(
+      (p) => finish({ lat:p.coords.latitude, lon:p.coords.longitude, accuracy_m:p.coords.accuracy }),
+      () => { S.gpsNote = "denied"; finish(null); },
+      { enableHighAccuracy:false, timeout:20000, maximumAge:600000 });
+  });
+}
+
+/* ====================================================================== upload card states */
+const UP = { kind:null };
+function renderUp(){
+  const box = $("upState"), u = UP;
+  if (!u.kind){ box.className = "upstate hidden"; box.innerHTML = ""; return; }
+  const fl = u.name ? `<div class="fl"><span class="nm">${esc(u.name)}</span><span class="sz">${esc(u.size)}</span></div>` : "";
+  let body = "";
+  if (u.kind === "uploading") body = `<div class="meter"><i style="width:${u.pct || 0}%"></i></div><p class="msg2">${esc(t("upUploading", u.pct || 0))}</p>`;
+  else if (u.kind === "reading") body = `<div class="meter indet"><i></i></div><p class="msg2">${esc(t("upReading"))}</p>`;
+  else if (u.kind === "ok") body = `<p class="msg2">✓ ${esc(u.units ? t("upDone", num(u.units), u.discom || "") : t("upDoneNoUnits"))}</p>`;
+  else if (u.kind === "err") body = `<p class="msg2">${esc(u.msg)}</p>${u.tip ? `<p class="tip">${esc(t("upTips"))}</p>` : ""}<button class="btn sm ghost again" type="button" id="upAgain">${esc(t("upRetry"))}</button>`;
+  box.className = "upstate" + (u.kind === "ok" ? " ok" : u.kind === "err" ? " err" : "");
+  box.innerHTML = fl + body;
+  const again = $("upAgain"); if (again) again.addEventListener("click", () => $("billFile").click());
+}
+function setUp(kind, extra){ Object.assign(UP, { kind }, extra || {}); renderUp(); }
+const sizeTxt = (b) => b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+function checkFile(file){
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (ext === "heic" || ext === "heif" || /heic|heif/i.test(file.type)) return t("upErrHeic");
+  if (!OK_EXT.includes(ext)) return t("upErrType");
+  if (file.size > MAX_MB * 1048576) return t("upErrSize", (file.size / 1048576).toFixed(1));
+  return null;
+}
+
+/* ====================================================================== progress */
+const STAGES = ["p1","p2","p3","p4"];
+function setStage(i, state, detail){ S.stage[i] = { state, detail: detail || (S.stage[i] && S.stage[i].detail) || "" }; renderProgress(); }
+function renderProgress(){
+  if (!S.stage.length) return;
+  $("runRows").innerHTML = STAGES.map((k, i) => {
+    const s = S.stage[i] || { state:"wait" };
+    const mark = s.state === "done" ? "✓" : s.state === "fail" ? "!" : s.state === "active" ? `<span class="spin" style="margin:0"></span>` : String(i + 1);
+    return `<div class="prow ${s.state}"><div class="dot">${mark}</div><div><b>${esc(t(k))}</b><span>${esc(s.detail || "")}</span></div></div>`;
+  }).join("");
+  const done = S.stage.filter(s => s && s.state === "done").length;
+  setProgress(done * 25 + (S.stage.some(s => s && s.state === "active") ? 8 : 0));
+}
+
+/* ====================================================================== the pipeline */
+function resetAll(){
+  Object.assign(S, { file:null, bill:null, loc:null, gps:null, gpsNote:null, report:null, roofArea:null, kw:null, unitsOverride:null,
+                     extra:{}, stage:[], busy:false, quote:null, rendered:false, manual:false });
+  ["progress","needs","report","extras","manualBox"].forEach(id => show(id, false));
+  $("billFile").value = ""; setUp(null); setProgress(0); scrollToEl($("top"));
+}
+async function startWithFile(file){
+  if (S.busy) return;
+  const bad = checkFile(file);
+  if (bad){ setUp("err", { name:file.name, size:sizeTxt(file.size), msg:bad, tip:false }); return; }
+  Object.assign(S, { busy:true, file, bill:null, loc:null, report:null, roofArea:null, kw:null, unitsOverride:null, extra:{}, stage:[], gpsNote:null, rendered:false, manual:false });
+  show("report", false); show("extras", false); show("needs", false); show("manualBox", false); show("progress", true);
+  status("runStatus", "");
+  setUp("uploading", { name:file.name, size:sizeTxt(file.size), pct:0 });
+  if (file.type.startsWith("image/")){ $("runImg").src = URL.createObjectURL(file); show("runImg", true); } else show("runImg", false);
+  setStage(0, "active", t("pwork")); setStage(1, "wait"); setStage(2, "wait"); setStage(3, "wait");
+  scrollToEl($("progress"));
+  const gpsP = getGps();                       // permission prompt appears while the bill is being read
+  try {
+    const fd = new FormData(); fd.append("file", file);
+    S.bill = await upload("/bill", fd, (p) => { if (p >= 100) setUp("reading"); else setUp("uploading", { pct:p }); });
+    const b = S.bill;
+    delete b.consumer_name; delete b.ca_number;          // not needed for anything after this point
+    setUp("ok", { units: b.avg_monthly_units || b.units_consumed || null, discom: b.discom || "" });
+    if (b.avg_monthly_units) setStage(0, "done", t("billDone", num(b.avg_monthly_units), b.discom || ""));
+    else setStage(0, "fail", t("billNoUnits", b.discom || ""));
+    setStage(1, "active", t("pwait"));
+    S.gps = await gpsP;
+    await locateAndAnalyze();
+  } catch(e){
+    setUp("err", { msg:t("upErrRead") + " " + (e.message || ""), tip:true });
+    fail(0, e);
+  }
+}
+async function locateAndAnalyze(opts){
+  opts = opts || {};
+  setStage(1, "active", t("pwork"));
+  const body = { bill: S.bill };
+  if (S.gps){ body.lat = S.gps.lat; body.lon = S.gps.lon; body.accuracy_m = S.gps.accuracy_m; }
+  if (opts.prefer) body.prefer = opts.prefer;
+  if (opts.query) body.query = opts.query;
+  S.loc = await post("/locate", body);
+  if (S.loc.needs_manual){ setStage(1, "fail", ""); return askNeeds(); }
+  if (S.gpsNote && S.loc.source !== "gps") S.loc.notes = [...(S.loc.notes || []), S.gpsNote];
+  setStage(1, "done", t("locDone", S.loc.label, t("src_" + S.loc.source)));
+  const units = S.unitsOverride || (S.bill && (S.bill.avg_monthly_units || S.bill.units_consumed));
+  if (!units){ return askNeeds(); }
+  await runAnalysis();
+}
+async function runAnalysis(){
+  show("needs", false); show("progress", true);
+  setStage(2, "active", t("pwork"));
+  const body = { location: S.loc, bill: S.bill, ...S.extra };
+  if (S.unitsOverride) body.monthly_units = S.unitsOverride;
+  if (S.roofArea) body.roof_area_m2 = S.roofArea;
+  if (S.kw) body.kw_override = S.kw;
+  try {
+    const r = await post("/analyze", body);
+    if (!r.ok){ setStage(2, "fail", ""); status("runStatus", t("roofTooSmall"), "err"); S.busy = false; return; }
+    S.report = r;
+    const h = r.history;
+    setStage(2, "done", h.mode === "weather" ? t("genDone", fmtYm(h.start), fmtYm(h.end)) : t("hTyp"));
+    setStage(3, "done", t("planDone", r.plan.kw, r.per_panel.panels));
+    await new Promise(res => setTimeout(res, RM() ? 0 : 700));          // let the last tick land
+    show("progress", false);                                             // hide first, so the scroll target cannot move afterwards
+    renderReport(); show("report", true); show("extras", true); renderRoofLead(); renderSuggest();
+    S.busy = false;
+    requestAnimationFrame(() => scrollToEl($("report")));
+  } catch(e){ fail(2, e); }
+}
+function fmtYm(iso){ const [y, m] = iso.split("-"); return `${mon(+m - 1)} ${y}`; }
+function fail(i, e){ setStage(i, "fail", ""); status("runStatus", e.message || t("err_generic"), "err"); S.busy = false; setProgress(0); }
+function renderNeedRead(){
+  const b = S.bill || {}, bits = [];
+  if (b.discom) bits.push(b.discom);
+  if (b.avg_monthly_units || b.units_consumed) bits.push(`${num(b.avg_monthly_units || b.units_consumed)} ${t("units_")}`);
+  if (b.sanctioned_load_kw) bits.push(`${b.sanctioned_load_kw} kW`);
+  if (b.pincode || b.city) bits.push(b.pincode || b.city);
+  $("needRead").textContent = (S.file && bits.length) ? t("needRead", bits.join(", ")) : "";
+}
+function askNeeds(){
+  S.busy = false; show("needs", true);
+  const noUnits = !(S.unitsOverride || (S.bill && (S.bill.avg_monthly_units || S.bill.units_consumed)));
+  const noLoc = !S.loc || S.loc.needs_manual;
+  show("needUnits", noUnits); show("needLoc", noLoc);
+  renderNeedRead();
+  status("needStatus", ""); scrollToEl($("needs"));
+  setTimeout(() => { const f = noUnits ? $("nUnits") : $("nCity"); f && f.focus({ preventScroll:true }); }, 350);
+}
+$("needGo").addEventListener("click", async () => {
+  const u = +$("nUnits").value, city = $("nCity").value.trim();
+  if (!$("needUnits").classList.contains("hidden")){ if (!(u > 0 && u <= 20000)) return status("needStatus", t("eUnitsReq"), "err"); S.unitsOverride = u; setStage(0, "done", t("billDone", num(u), (S.bill && S.bill.discom) || "")); }
+  if (!$("needLoc").classList.contains("hidden")){ if (!city) return status("needStatus", t("needCityErr"), "err"); }
+  S.busy = true; status("needStatus", t("pwork"), "busy");
+  try {
+    if (!$("needLoc").classList.contains("hidden")) { await locateAndAnalyze({ query: city }); if (S.loc && S.loc.needs_manual) { S.busy = false; status("needStatus", t("notFound"), "err"); } }
+    else if (S.loc && !S.loc.needs_manual) await runAnalysis();        // only the units were missing: the place is already known
+    else await locateAndAnalyze();
+  } catch(e){ S.busy = false; status("needStatus", e.message, "err"); }
+});
+["nUnits","nCity"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("needGo").click(); } }));
+
+/* ====================================================================== manual (no bill) */
+const STATES = {DL:"Delhi",UP:"Uttar Pradesh",MH:"Maharashtra",KA:"Karnataka",TN:"Tamil Nadu",HR:"Haryana",PB:"Punjab",RJ:"Rajasthan",GJ:"Gujarat",WB:"West Bengal",MP:"Madhya Pradesh",TG:"Telangana",AP:"Andhra Pradesh",KL:"Kerala",BR:"Bihar",OD:"Odisha",CG:"Chhattisgarh",JH:"Jharkhand",UK:"Uttarakhand",HP:"Himachal Pradesh",AS:"Assam",GA:"Goa",CH:"Chandigarh",JK:"Jammu and Kashmir"};
+$("mState").innerHTML = `<option value="">—</option>` + Object.entries(STATES).sort((a, b) => a[1].localeCompare(b[1])).map(([c, n]) => `<option value="${c}">${n}</option>`).join("");
+$("manualLink").addEventListener("click", () => { show("manualBox", true); scrollToEl($("manualBox")); setTimeout(() => $("mUnits").focus({ preventScroll:true }), 350); });
+$("manualCancel").addEventListener("click", () => { show("manualBox", false); clearFieldErrors(); scrollToEl($("top")); });
+function fieldErr(id, msg){
+  const inp = $(id), e = $(id + "E");
+  if (inp) inp.setAttribute("aria-invalid", msg ? "true" : "false");
+  if (e) e.textContent = msg || "";
+}
+function clearFieldErrors(){ ["mUnits","mCity","mLoad"].forEach(id => fieldErr(id, "")); fieldErr("manualArea", ""); }
+function validateManual(){
+  const uRaw = $("mUnits").value.trim(), u = +uRaw, city = $("mCity").value.trim(), lRaw = $("mLoad").value.trim(), l = +lRaw;
+  let ok = true;
+  if (!uRaw){ fieldErr("mUnits", t("eUnitsReq")); ok = false; }
+  else if (!(u >= 1 && u <= 20000)){ fieldErr("mUnits", t("eUnitsRange")); ok = false; }
+  else fieldErr("mUnits", "");
+  if (!city){ fieldErr("mCity", t("eCityReq")); ok = false; }
+  else if (/^\d+$/.test(city.replace(/\s/g, "")) && !/^[1-9]\d{5}$/.test(city.replace(/\s/g, ""))){ fieldErr("mCity", t("ePin")); ok = false; }
+  else fieldErr("mCity", "");
+  if (lRaw && !(l >= 0.5 && l <= 100)){ fieldErr("mLoad", t("eLoad")); ok = false; } else fieldErr("mLoad", "");
+  return ok ? { u, city: city.replace(/^(\d{3})\s+(\d{3})$/, "$1$2"), l: lRaw ? l : null } : null;
+}
+["mUnits","mCity","mLoad"].forEach(id => $(id).addEventListener("input", () => { if ($(id).getAttribute("aria-invalid") === "true") validateManual(); }));
+$("manualForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const v = validateManual();
+  if (!v){ status("manualStatus", t("fixAbove"), "err"); const first = document.querySelector("#manualForm [aria-invalid='true']"); first && first.focus(); return; }
+  if (S.busy) return;
+  Object.assign(S, { busy:true, file:null, bill:{ avg_monthly_units:v.u, state: $("mState").value || null, sanctioned_load_kw: v.l }, unitsOverride:v.u,
+                     loc:null, report:null, roofArea:null, kw:null, extra:{}, stage:[], gps:null, gpsNote:null, manual:true });
+  setUp(null);
+  $("manualGo").disabled = true;
+  show("progress", true); show("runImg", false); status("manualStatus", ""); scrollToEl($("progress"));
+  setStage(0, "done", t("billDone", num(v.u), "")); setStage(1, "active", t("pwork")); setStage(2, "wait"); setStage(3, "wait");
+  try { await locateAndAnalyze({ query: v.city }); if (S.loc && S.loc.needs_manual){ S.busy = false; show("progress", false); fieldErr("mCity", t("notFound")); status("manualStatus", t("notFound"), "err"); scrollToEl($("manualBox")); } }
+  catch(e){ fail(1, e); }
+  finally { $("manualGo").disabled = false; }
+});
+
+/* drop zones */
+function wireDrop(dropId, inputId, onFile){
+  const drop = $(dropId), input = $(inputId);
+  input.addEventListener("change", () => { const f = input.files[0]; if (f){ onFile(f); input.value = ""; } });   // clear so the same file can be chosen again
+  ["dragenter","dragover"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", ev => ev.dataTransfer.files[0] && onFile(ev.dataTransfer.files[0]));
+}
+wireDrop("billDrop", "billFile", startWithFile);
+
+/* ====================================================================== report */
+function ico(name){
+  const p = {
+    coal:'<path d="M5 15l2-6 5-3 6 4 1 6-5 3-7-1-2-3z"/><path d="M7 9l5 3 6-2M12 12v8"/>',
+    drop:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+    cloud:'<path d="M7 18a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1 .5 8.5H7z"/>',
+    tree:'<path d="M12 21v-6M12 3l5 7h-3l4 6H6l4-6H7l5-7z"/>',
+    factory:'<path d="M3 21V10l6 3V10l6 3V6h3v15H3z"/><path d="M7 17h2M12 17h2"/>',
+    dust:'<circle cx="7" cy="8" r="1.6"/><circle cx="14" cy="6" r="1.2"/><circle cx="17" cy="13" r="1.8"/><circle cx="9" cy="16" r="1.4"/><circle cx="13" cy="19" r="1"/>',
+    layers:'<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+    wave:'<path d="M3 9c3-3 6 3 9 0s6 3 9 0M3 15c3-3 6 3 9 0s6 3 9 0"/>',
+    leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19l7-7"/>',
+    pin:'<path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'
+  }[name];
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+}
+function freeAfterText(b){ const f = b.free_after_years; return !f ? "—" : (f[0] === f[1] ? `${f[0]}` : `${f[0]}–${f[1]}`); }
+function renderReport(){
+  const r = S.report, p = r.plan, b = r.breakeven, pp = r.per_panel, loc = r.location;
+  const hi = S.lang === "hi", free = p.delhi_free_scheme;
+  const annualSave = Math.round(p.monthly_table.reduce((a, m) => a + m.saving, 0) / 100) * 100;
+  const warn = (r.warnings || []).map(w => `<div class="alert">${esc(TX["w_" + w.code] ? t("w_" + w.code) : w.text)}</div>`).join("");
+  const subTotal = (p.central_subsidy || 0) + (p.state_subsidy || 0);
+  const stateName = r.state === "DL" ? t("delhiName") : (r.subsidy.state_label || "");
+  const subS = p.state_subsidy ? t("k_subCS", stateName) : t("k_subC");
+  const payS = free ? t("k_payFree") : (p.loan_principal ? t("k_payEmi", rupee(p.emi)) : t("k_payS"));
+  const pbV = b.from_day_one ? t("k_pbNone") : (b.free_after_years ? t("k_pbV", freeAfterText(b)) : t("k_pbNever"));
+  const pbS = b.from_day_one ? t("k_pbNoneS") : t("k_pbS");
+  const incl = p.state_subsidy ? t("inclCS", rupee(p.central_subsidy), rupee(p.state_subsidy), stateName) : t("inclC", rupee(p.central_subsidy));
+  const inputsTxt = (S.file ? t("fromBill", num(r.inputs.monthly_units), r.inputs.sanctioned_load_kw || "", esc(r.inputs.discom || "")) : t("youEntered", num(r.inputs.monthly_units), r.inputs.sanctioned_load_kw || "", esc(r.inputs.discom || "")));
+  $("report").innerHTML = `
+    <section class="summary verdictBox reveal" id="sumBox" aria-labelledby="sumL">
+      <div class="sumTop">
+        <p class="sl" id="sumL">${esc(t("sumL"))}</p>
+        <div class="sumNum tnum"><span data-count="${annualSave}" data-fmt="rupee">${rupee(annualSave)}</span> <span class="per">${esc(t("perYear"))}</span></div>
+        <p class="ss">${esc(t("sumSub", rupee(p.avg_monthly_saving), rupee(p.avg_bill_before)))}</p>
+        <p class="verdict">${esc(hi ? p.headline_hi : p.headline_en)}</p>
+      </div>
+      <div class="sumBody">
+        ${locationHtml(loc)}
+        ${warn}
+        <div class="kpis">
+          <div class="kpi"><div class="k">${esc(t("k_size"))}</div><div class="v">${p.kw} kW</div><div class="s">${esc(t("k_sizeS", pp.panels, Math.round(r.roof.needed_m2)))}</div></div>
+          <div class="kpi"><div class="k">${esc(t("k_cost"))}</div><div class="v tnum">${rupee(p.gross_cost)}</div><div class="s">${esc(t("k_costS"))}</div></div>
+          <div class="kpi pos"><div class="k">${esc(t("k_sub"))}</div><div class="v tnum">${rupee(subTotal)}</div><div class="s">${esc(subS)}</div></div>
+          <div class="kpi"><div class="k">${esc(t("k_pay"))}</div><div class="v tnum">${rupee(p.upfront_cost)}</div><div class="s">${esc(payS)}</div></div>
+          <div class="kpi pos"><div class="k">${esc(t("k_pb"))}</div><div class="v">${esc(pbV)}</div><div class="s">${esc(pbS)}</div></div>
+          <div class="kpi"><div class="k">${esc(t("k_gen"))}</div><div class="v tnum">${esc(t("k_genV", num(p.generation.annual_kwh)))}</div><div class="s">${esc(t("k_genS"))}</div></div>
+        </div>
+        <p class="alsoline">${ico("leaf")}<span>${esc(t("alsoCoal", kgTxt(r.impact.per_year.coal_kg)))}</span></p>
+        <p class="incl">${esc(incl)} ${esc(t("notGuar"))}</p>
+        <div class="inputs">
+          <span>${inputsTxt}</span>
+          <button class="btn sm ghost" id="editBtn" type="button" aria-expanded="false" aria-controls="editBox">${esc(t("edit"))}</button>
+          <button class="btn sm ghost" id="restartBtn" type="button">${esc(t("startOver"))}</button>
+        </div>
+        <div id="editBox" class="editbox hidden">
+          <div class="grid2">
+            <div><label for="eUnits">${esc(t("unitsL"))}</label><input type="number" id="eUnits" min="1" max="20000" step="1" inputmode="numeric" value="${Math.round(r.inputs.monthly_units)}"></div>
+            <div><label for="eLoad">${esc(t("loadL"))} <span class="opt">${esc(t("optional"))}</span></label><input type="number" id="eLoad" min="0.5" max="100" step="0.5" inputmode="decimal" value="${r.inputs.sanctioned_load_kw || ""}"></div>
+            ${r.state !== "DL" ? `<div><label for="eTariff">${esc(t("tariffL"))}</label><input type="number" id="eTariff" min="1" max="20" step="0.1" inputmode="decimal" value="${r.inputs.flat_tariff || 7}"></div>` : ""}
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn" id="editGo" type="button">${esc(t("recalc"))}</button><span class="ferr" id="editE"></span></div>
+        </div>
+      </div>
+    </section>
+    ${verifyHtml(r)}
+    ${historyHtml(r)}
+    ${panelHtml(r)}
+    ${breakevenHtml(r)}
+    ${impactHtml(r)}
+    ${subsidyHtml(r)}`;
+  if (S.rendered) $("report").querySelectorAll(".reveal").forEach(el => el.classList.remove("reveal"));
+  S.rendered = true;
+  animateCounts($("report")); growBars($("report"));
+  wireReport();
+  const cr = (r.credits || []).map(c => `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.label)}</a>`).join(" · ");
+  $("credits").innerHTML = cr; $("asofFoot").textContent = t("asof", r.rules_as_of);
+}
+function locationHtml(loc){
+  const alt = (loc.alternatives || [])[0];
+  let notes = (loc.notes || []).filter(n => TX["n_" + n]).map(n => n === "gps_differs_from_bill" && alt
+      ? `<div class="alert info">${esc(t("n_gps_differs_from_bill", alt.city || alt.label))}<br><button class="btn sm ghost" id="useGps" type="button">${esc(t("useGps"))}</button></div>`
+      : `<div class="alert info">${esc(t("n_" + n))}</div>`);
+  return `<div class="locrow"><span class="pin">${ico("pin")}${esc(loc.label)} <small>${esc(t("src_" + loc.source))}</small></span>
+            <button class="btn sm ghost" id="chgLoc" type="button" aria-expanded="false">${esc(t("change"))}</button>
+            <span id="chgBox" class="hidden row"><label for="chgIn" class="sr">${esc(t("changePh"))}</label><input type="text" id="chgIn" placeholder="${esc(t("changePh"))}" style="width:200px"><button class="btn sm" id="chgGo" type="button">${esc(t("find"))}</button></span></div>${notes.join("")}`;
+}
+function verifyHtml(r){
+  return `<section class="panel verify" id="verifyBox" aria-labelledby="vH">
+    <p class="eyebrow">${esc(t("vEye"))}</p>
+    <h2 id="vH">${esc(t("vH"))}</h2>
+    <ol>
+      <li><div><b>${esc(t("v1T"))}</b><span>${esc(t("v1", r.rules_as_of))}</span></div></li>
+      <li><div><b>${esc(t("v2T"))}</b><span>${esc(t("v2"))}</span></div></li>
+      <li><div><b>${esc(t("v3T"))}</b><span>${esc(t("v3"))}</span></div></li>
+      <li><div><b>${esc(t("v4T"))}</b><span>${esc(t("v4"))}</span></div></li>
+    </ol>
+  </section>`;
+}
+function historyHtml(r){
+  const h = r.history, w = h.mode === "weather", which = (w && S.view.hist === "60") ? "60" : "12";
+  const a = which === "60" ? h.last60 : h.last12;
+  let bars = "", labels = "", period = t("hTyp");
+  if (which === "60"){
+    const ys = h.last60.years, mx = Math.max(...ys.map(y => y.kwh), 1);
+    bars = `<div class="bars y5" aria-hidden="true">${ys.map(y => `<div class="bar" title="${esc(y.label)}: ${num(y.kwh)} ${esc(t("units_"))}, ${rupee(y.inr)}"><em>${short(y.inr)}</em><i data-h="${(100*y.kwh/mx).toFixed(0)}%"></i></div>`).join("")}</div>`;
+    labels = `<div class="blabels y5" aria-hidden="true">${ys.map(y => { const yy = y.label.match(/\d{4}/g); return `<span>${yy[0]}–${yy[1].slice(2)}</span>`; }).join("")}</div>`;
+    period = `${fmtYm(h.start)} – ${fmtYm(h.end)}`;
+  } else {
+    const ms = h.months.slice(-12), mx = Math.max(...ms.map(m => m.kwh), 1);
+    const lab = (m) => w ? mon(+m.ym.slice(5) - 1) : (TX.mo[L_()][["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].indexOf(m.label)]);
+    bars = `<div class="bars m12" aria-hidden="true">${ms.map(m => `<div class="bar" title="${esc(lab(m))}: ${num(m.kwh)} ${esc(t("units_"))}, ${rupee(m.inr)}"><i data-h="${(100*m.kwh/mx).toFixed(0)}%"></i></div>`).join("")}</div>`;
+    labels = `<div class="blabels m12" aria-hidden="true">${ms.map(m => `<span>${esc(lab(m).slice(0, S.lang === "hi" ? 3 : 1))}</span>`).join("")}</div>`;
+    if (w) period = `${mon(+h.months[h.months.length - 12].ym.slice(5) - 1)} ${h.months[h.months.length - 12].ym.slice(0, 4)} – ${fmtYm(h.end)}`;
+  }
+  const typ = w && h.last12.vs_typical_pct != null && which === "12" ? `<p class="note">${esc(t("vsTyp", h.last12.vs_typical_pct))}</p>` : "";
+  const bw = w && which === "12" ? `<p class="note">${esc(t("bestM", mon(+h.last12.best_month.ym.slice(5) - 1), num(h.last12.best_month.kwh)))}; ${esc(t("worstM", mon(+h.last12.worst_month.ym.slice(5) - 1), num(h.last12.worst_month.kwh)))}</p>` : "";
+  const nw = r.now ? liveHtml(r) : "";
+  return `<section class="panel" id="histBox" aria-labelledby="hH">
+    <p class="eyebrow">${esc(t("hEye"))}</p>
+    <h2 id="hH">${esc(t("hH", r.plan.kw))}</h2>
+    ${w ? `<div class="seg-toggle" role="group" aria-label="${esc(t("hEye"))}"><button type="button" data-hist="12" aria-pressed="${which === "12"}">${esc(t("h12"))}</button><button type="button" data-hist="60" aria-pressed="${which === "60"}">${esc(t("h60"))}</button></div>` : ""}
+    <div class="bignum tnum" style="margin-top:6px"><span data-count="${a.kwh}">${num(a.kwh)}</span> <small>${esc(t("units_"))}</small></div>
+    <p class="sub2">${esc(t("earned"))} <b class="tnum" style="color:var(--green);font-size:1.2em"><span data-count="${a.inr}" data-fmt="rupee">${rupee(a.inr)}</span></b>, ${esc(period)}</p>
+    ${bars}${labels}${typ}${bw}
+    <p class="note">${esc(w ? t("hCap", r.plan.kw, h.tilt) : "")} ${w && h.calibration && h.calibration.applied ? esc(t("hCal")) : ""} ${w ? "" : esc(t("hTyp"))}</p>
+    ${nw}
+  </section>`;
+}
+function liveHtml(r){
+  const n = r.now, city = r.location.city || r.location.label;
+  const sky = n.sky ? t("sky_" + n.sky) : "";
+  const watts = n.system_watts >= 1000 ? (n.system_watts / 1000).toFixed(1) + " kW" : n.system_watts + " W";
+  return `<div class="livebox ${n.is_day ? "" : "night"}"><div class="sunball" aria-hidden="true"></div><div><b>${esc(t("liveH", city))}</b><br>
+    <span class="hint">${n.is_day ? esc(t("liveTxt", Math.round(n.temp_c), sky, watts, n.today_kwh_so_far, n.today_kwh_forecast)) : esc(t("liveNight"))}</span></div></div>`;
+}
+function panelArrayHtml(pp){
+  const n = pp.panels, cols = Math.min(n, n <= 6 ? 3 : n <= 12 ? 4 : 6), rows = Math.ceil(n / cols), w = 92, hgt = 60, g = 8;
+  const W = cols * w + (cols - 1) * g + 4, H = rows * hgt + (rows - 1) * g + 4;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="${Math.min(W * 1.6, 560)}" role="img" aria-label="${esc(t("pH", n, pp.watt_peak))}">`;
+  for (let i = 0; i < n; i++){
+    const x = 2 + (i % cols) * (w + g), y = 2 + Math.floor(i / cols) * (hgt + g);
+    s += `<g><rect x="${x}" y="${y}" width="${w}" height="${hgt}" rx="6" fill="#142B3B" stroke="#F4B942" stroke-width="1.6"/>`
+       + `<path d="M${x + w/3} ${y + 3}v${hgt - 6}M${x + 2*w/3} ${y + 3}v${hgt - 6}M${x + 3} ${y + hgt/2}h${w - 6}" stroke="#2E4C66" stroke-width="1"/>`
+       + `<text x="${x + w/2}" y="${y + hgt/2 + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="#F4B942" stroke="#142B3B" stroke-width="3" paint-order="stroke" font-family="Inter,system-ui,sans-serif">${short(pp.inr_per_panel_year)}</text></g>`;
+  }
+  return s + `</svg>`;
+}
+const yrsTxt = (n) => (String(n) === "1" ? (S.lang === "hi" ? "1 साल" : "1 year") : `${n} ${S.lang === "hi" ? "साल" : "years"}`);
+function pbClass(y){ return y == null ? "bad" : y <= 5 ? "good" : y <= 10 ? "meh" : "bad"; }
+function panelHtml(r){
+  const pp = r.per_panel, rec = r.plan.kw, bind = r.plan.sizing;
+  let whyTxt = "";
+  if (S.kw) whyTxt = "";                                                     // the user picked this size themselves
+  else if (bind.binding_limit === "payback"){
+    const nx = r.ladder.find(x => x.kw > rec);
+    whyTxt = t("whyPay", bind.max_useful_kw, rec, nx && nx.extra.payback_years != null ? Math.round(nx.extra.payback_years) : "10+");
+  } else if (TX.whyOther[bind.binding_limit]) whyTxt = TX.whyOther[bind.binding_limit][L_()];
+  const rows = r.ladder.map(x => {
+    const ex = x.extra, first = x === r.ladder[0];
+    const yrs = ex.payback_years == null ? "—" : (ex.payback_years === 0 ? t("ex0") : `<span class="${pbClass(ex.payback_years)}">${esc(yrsTxt(ex.payback_years))}</span>`);
+    const exTxt = first ? esc(t("exFirst", x.panels)) : (ex.upfront <= 0 && ex.annual_saving <= 0 ? esc(t("ex0")) :
+        t("ex", ex.panels, rupee(Math.max(ex.upfront, 0)), rupee(ex.annual_saving), yrs) + (ex.subsidy <= 0 && x.kw > 3 ? `; ${esc(t("noSub"))}` : ""));
+    return `<div class="lrow ${x.recommended ? "best" : ""}">
+      <div class="sz" data-l="${esc(t("lh1"))}">${x.kw} kW<small>${x.panels} ${esc(t("panelsW"))}</small>${x.recommended ? `<span class="tag">${esc(t(S.kw ? "yourPick" : "best"))}</span>` : ""}</div>
+      <div data-l="${esc(t("lh2"))}" class="tnum"><b>${rupee(x.upfront)}</b></div>
+      <div data-l="${esc(t("lh3"))}" class="tnum"><b>${rupee(x.annual_saving)}</b></div>
+      <div data-l="${esc(t("lh4"))}" class="tnum"><b class="${pbClass(x.payback_years)}">${x.payback_years === 0 ? esc(t("day1")) : x.payback_years == null ? "—" : esc(yrsTxt(x.payback_years))}</b></div>
+      <div class="ex" data-l="${esc(t("lh5"))}">${exTxt}</div>
+      <button class="go" type="button" data-kw="${x.kw}" ${x.recommended ? "disabled" : ""}>${esc(t("seeThis"))}</button></div>`;
+  }).join("");
+  return `<section class="panel" id="panelBox" aria-labelledby="pH">
+    <p class="eyebrow">${esc(t("pEye"))}</p>
+    <h2 id="pH">${esc(t("pH", pp.panels, pp.watt_peak))}</h2>
+    <p class="lead">${esc(t("pLead", pp.area_each_m2))}</p>
+    <div class="ptiles">
+      <div class="ptile hot"><div class="v tnum">${rupee(pp.inr_per_panel_year)}</div><div class="k">${esc(t("pA"))}</div></div>
+      <div class="ptile"><div class="v tnum">${rupee(pp.inr_per_panel_month)}</div><div class="k">${esc(t("pB"))}</div></div>
+      <div class="ptile"><div class="v tnum">${rupee(pp.inr_per_panel_day)}</div><div class="k">${esc(t("pC"))}</div></div>
+      <div class="ptile"><div class="v tnum">${rupee(pp.inr_per_m2_year)}</div><div class="k">${esc(t("pD"))}</div></div>
+    </div>
+    <p class="note">${num(pp.kwh_per_panel_year)} ${esc(t("pE"))}</p>
+    <div class="array">${panelArrayHtml(pp)}</div>
+    ${whyTxt ? `<div class="alert info">${esc(whyTxt)}</div>` : ""}
+    <h3 style="margin:20px 0 0;font-size:1.06rem">${esc(t("lH"))}</h3>
+    <div class="ladder">
+      <div class="lrow head" aria-hidden="true"><div>${esc(t("lh1"))}</div><div>${esc(t("lh2"))}</div><div>${esc(t("lh3"))}</div><div>${esc(t("lh4"))}</div><div>${esc(t("lh5"))}</div><div></div></div>
+      ${rows}
+    </div>
+    ${S.kw ? `<div class="row" style="margin-top:8px"><button class="btn sm ghost" id="backRec" type="button">${esc(t("backRec"))}</button></div>` : ""}
+  </section>`;
+}
+const C_FLAT = "#5E6D79", C_GROW = "#287A55";
+function breakevenSvg(b){
+  const W = 640, H = 280, m = { l:66, r:16, t:16, b:40 };
+  const xs = b.cumulative.years, c = b.cumulative.conservative, o = b.cumulative.optimistic;
+  const lo = Math.min(0, ...c, ...o), hi = Math.max(0, ...c, ...o), span = (hi - lo) || 1;
+  const X = (y) => m.l + (W - m.l - m.r) * y / xs[xs.length - 1], Y = (v) => m.t + (H - m.t - m.b) * (1 - (v - lo) / span);
+  const line = (a) => a.map((v, i) => (i ? "L" : "M") + X(xs[i]).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+  const ticks = [0, 5, 10, 15, 20, 25];
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("bEye"))}: ${esc(t("bGain", short(b.net_gain_25y.conservative), short(b.net_gain_25y.optimistic)))}">`;
+  [lo, lo + span/2, hi].forEach(v => { s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E4E8EB"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${short(v)}</text>`; });
+  if (lo < 0) s += `<rect x="${m.l}" y="${Y(0)}" width="${W - m.l - m.r}" height="${Y(lo) - Y(0)}" fill="#FDECEA" opacity=".45"/>`;
+  s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="#172B3A" stroke-width="1.4"/>`;
+  ticks.forEach(y => { s += `<text x="${X(y)}" y="${H - 18}" text-anchor="middle">${y}</text>`; });
+  s += `<text x="${(m.l + W - m.r) / 2}" y="${H - 2}" text-anchor="middle" font-size="10.5">${esc(t("yearAxis"))}</text>`;
+  s += `<text x="12" y="${(m.t + H - m.b) / 2}" text-anchor="middle" font-size="10.5" transform="rotate(-90 12 ${(m.t + H - m.b) / 2})">${esc(t("yAxis"))} (₹)</text>`;
+  s += `<path d="${line(c)}" fill="none" stroke="${C_FLAT}" stroke-width="2.4" stroke-dasharray="6 5"/>`;
+  s += `<path d="${line(o)}" fill="none" stroke="${C_GROW}" stroke-width="3"/>`;
+  [[b.payback_years.conservative, C_FLAT], [b.payback_years.optimistic, C_GROW]].forEach(([py, col]) => {
+    if (py != null && py > 0) s += `<circle cx="${X(py)}" cy="${Y(0)}" r="5.5" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+  });
+  const py = b.payback_years.optimistic;
+  if (py != null && py > 0){
+    const flip = X(py) > W * 0.62;
+    s += `<text x="${X(py) + (flip ? -10 : 10)}" y="${Y(0) - 12}" text-anchor="${flip ? "end" : "start"}" style="font-size:12px;font-weight:600;fill:#172B3A">${esc(t("bHere", py))}</text>`;
+  }
+  return s + `</svg>`;
+}
+function breakevenHtml(r){
+  const b = r.breakeven, gain = b.net_gain_25y;
+  const head = b.from_day_one ? t("bDay1") : (b.free_after_years ? t("bFree", freeAfterText(b)) : t("bNever"));
+  const sub = b.from_day_one ? t("bDay1T") : (b.free_years_left != null ? t("bLeft", b.free_years_left) : "");
+  const as = S.lang === "hi" && b.assumptions_hi ? b.assumptions_hi : b.assumptions;
+  return `<section class="panel" id="beBox" aria-labelledby="beH">
+    <p class="eyebrow">${esc(t("bEye"))}</p>
+    <h2 class="bignum" id="beH">${esc(head)}</h2>
+    <p class="sub2">${esc(sub)}</p>
+    <div class="chart">${breakevenSvg(b)}</div>
+    <div class="legend"><span><i style="border-color:${C_FLAT};border-top-style:dashed"></i>${esc(t("bFlat"))}</span><span><i style="border-color:${C_GROW}"></i>${esc(t("bGrow"))}</span></div>
+    <p class="note">${esc(t("bRead"))}</p>
+    <p class="note"><b>${esc(t("bGain", short(gain.conservative), short(gain.optimistic)))}</b></p>
+    <details><summary>${esc(t("bAssume"))}</summary><ul>${as.map(a => `<li>${esc(a)}</li>`).join("")}</ul></details>
+  </section>`;
+}
+function impactHtml(r){
+  const w = r.history.mode === "weather";
+  const which = (!w && S.view.impact === "60") ? "12" : S.view.impact;
+  const d = which === "25" ? r.impact.lifetime : which === "60" ? r.impact.last60 : r.impact.last12;
+  const coal = kgFmt(d.coal_kg), co2 = kgFmt(d.co2_kg), ash = kgFmt(d.ash_kg);
+  const water = { v:num(d.water_l), u:"L" };
+  const sfx = (u) => u === "t" ? (S.lang === "hi" ? "टन" : "tonnes") : "kg";
+  const m = r.impact.method, k = m.per_kwh;
+  return `<section class="panel" id="impBox" aria-labelledby="iH">
+    <p class="eyebrow">${esc(t("iEye"))}</p>
+    <h2 id="iH">${esc(t("iH"))}</h2>
+    <div class="seg-toggle" role="group" aria-label="${esc(t("iEye"))}">
+      <button type="button" data-imp="12" aria-pressed="${which === "12"}">${esc(t("i12"))}</button>
+      ${w ? `<button type="button" data-imp="60" aria-pressed="${which === "60"}">${esc(t("i60"))}</button>` : ""}
+      <button type="button" data-imp="25" aria-pressed="${which === "25"}">${esc(t("i25"))}</button>
+    </div>
+    <div class="itiles">
+      <div class="itile coal">${ico("coal")}<div class="v tnum">${coal.v} <small>${sfx(coal.u)}</small></div><div class="k">${esc(t("iCoal"))}</div></div>
+      <div class="itile petrol">${ico("drop")}<div class="v tnum">${num(d.petrol_l)} <small>L</small></div><div class="k">${esc(t("iPetrol", num(d.car_km)))}</div></div>
+      <div class="itile co2">${ico("cloud")}<div class="v tnum">${co2.v} <small>${sfx(co2.u)}</small></div><div class="k">${esc(t("iCo2"))}</div></div>
+      <div class="itile">${ico("factory")}<div class="v tnum">${d.so2_kg} <small>kg</small></div><div class="k">${esc(t("iSo2"))}</div></div>
+      <div class="itile">${ico("factory")}<div class="v tnum">${d.nox_kg} <small>kg</small></div><div class="k">${esc(t("iNox"))}</div></div>
+      <div class="itile">${ico("dust")}<div class="v tnum">${d.pm25_kg} <small>kg</small></div><div class="k">${esc(t("iPm"))}</div></div>
+      <div class="itile">${ico("layers")}<div class="v tnum">${ash.v} <small>${sfx(ash.u)}</small></div><div class="k">${esc(t("iAsh"))}</div></div>
+      <div class="itile">${ico("wave")}<div class="v tnum">${water.v} <small>${water.u}</small></div><div class="k">${esc(t("iWater"))}</div></div>
+      <div class="itile good2">${ico("tree")}<div class="v tnum">${num(d.trees_year)}</div><div class="k">${esc(t("iTrees"))}</div></div>
+    </div>
+    <p class="note">${esc(t("iNote"))}</p>
+    <details><summary>${esc(t("iHow"))}</summary>
+      <ul>
+        <li>${esc(t("iM1", k.co2_gross_kg, k.co2_lifecycle_kg, k.co2_net_kg.toFixed(3)))}</li>
+        <li>${esc(t("iM2", k.coal_kg.toFixed(2), k.so2_g.toFixed(1), k.nox_g.toFixed(1), k.pm25_g.toFixed(2), k.ash_kg.toFixed(2), k.water_l.toFixed(1)))}</li>
+        <li>${esc(t("iM3", m.petrol_kg_co2_per_litre, m.car_km_per_litre, m.tree_kg_co2_per_year))}</li>
+        ${m.sources.map(s => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a></li>`).join("")}
+      </ul></details>
+  </section>`;
+}
+function subsidyHtml(r){
+  const p = r.plan, s = r.subsidy, free = s.free_scheme, units = Math.round(r.inputs.monthly_units), hi = S.lang === "hi";
+  const topup = (s.possible_extra || []).map(x => `<div class="topup">${esc(t("topup", x.agency, rupee(x.up_to)))} <span class="hint">${esc(hi && x.note_hi ? x.note_hi : x.note)}</span></div>`).join("");
+  const dNote = s.state_note ? `<div class="alert">${esc(t("delhiNote"))}</div>` : "";
+  const dAbove = (s.state_note && s.free_scheme_limit_units && units > s.free_scheme_limit_units && p.state_subsidy) ? `<div class="alert">${esc(t("delhiAbove", num(p.state_subsidy), s.free_scheme_limit_units))}</div>` : "";
+  const freeNote = s.free_scheme_limit_units ? `<p class="note">${esc(free ? t("freeYes", s.free_scheme_limit_units) : t("freeNo", s.free_scheme_limit_units, units))}</p>` : "";
+  const conds = hi && s.conditions_hi ? s.conditions_hi : s.conditions;
+  const assume = hi && p.assumptions_hi && p.assumptions_hi.length ? p.assumptions_hi : p.assumptions;
+  return `<section class="panel" id="subBox" aria-labelledby="sH">
+    <p class="eyebrow">${esc(t("sEye"))}</p>
+    <h2 id="sH">${esc(t("sH"))}</h2>
+    <table class="money">
+      <tr><td>${esc(t("gross"))}</td><td>${rupee(p.gross_cost)}</td></tr>
+      <tr class="minus"><td>${esc(t("central"))}</td><td>− ${rupee(p.central_subsidy)}</td></tr>
+      ${p.state_subsidy ? `<tr class="minus"><td>${esc(t("stateSub"))}</td><td>− ${rupee(p.state_subsidy)}</td></tr>` : ""}
+      ${free && p.net_cost > 0 ? `<tr class="minus"><td>${esc(t("freeTop"))}</td><td>− ${rupee(p.net_cost)}</td></tr>` : ""}
+      <tr class="total"><td>${esc(t("youPay"))}</td><td>${rupee(p.upfront_cost)}</td></tr>
+      ${p.loan_principal ? `<tr><td>${esc(t("loan"))}</td><td>${rupee(p.loan_principal)}, ${rupee(p.emi)}${esc(t("perMonth"))}</td></tr>` : ""}
+    </table>
+    <div class="timeline">
+      ${free ? `<div class="tl"><b>${esc(t("tlFree"))}</b><span>${esc(t("tlFreeS"))}</span></div>` : `
+      <div class="tl"><b>${esc(t("tl0", rupee(s.cash_at_install)))}</b><span>${esc(t("tl0s"))}</span></div>
+      <div class="tl"><b>${esc(t("tl1", rupee(s.refund_later)))}</b><span>${esc(t("tl1s"))}</span></div>`}
+    </div>
+    <p class="note">${esc(t("ceil"))}</p>
+    ${freeNote}${dAbove}${dNote}${topup}
+    <details><summary>${esc(t("conds"))}</summary><ul>${conds.map(c => `<li>${esc(c)}</li>`).join("")}</ul></details>
+    <details id="docsBox"><summary>${esc(t("docs"))}</summary><ul id="docsList"></ul></details>
+    <details><summary>${esc(t("assumptions"))}</summary><ul>${assume.map(a => `<li>${esc(a)}</li>`).join("")}</ul></details>
+    <p class="note">${esc(t("asof", s.as_of))} ${s.portals.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace("https://", ""))}</a>`).join(", ")}</p>
+  </section>`;
+}
+let checklist = null;
+async function fillDocs(){
+  if (!checklist){ try { checklist = await call("/checklist"); } catch(e){ checklist = { documents:[] }; } }
+  const ul = $("docsList"); if (ul) ul.innerHTML = (checklist.documents || []).map(d => `<li>${esc(S.lang === "hi" ? d.hi : d.en)}</li>`).join("");
+}
+
+/* report wiring: ONE delegated listener, so re-rendering a section can never stack handlers */
+function wireReport(){ fillDocs(); }
+$("report").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const d = b.dataset;
+  if (d.hist){
+    S.view.hist = d.hist; $("histBox").outerHTML = historyHtml(S.report);
+    const box = $("histBox"); animateCounts(box); growBars(box); return;
+  }
+  if (d.imp){ S.view.impact = d.imp; $("impBox").outerHTML = impactHtml(S.report); return; }
+  if (d.kw && b.classList.contains("go")){ S.kw = +d.kw; return reanalyze(); }
+  switch (b.id){
+    case "backRec": S.kw = null; return reanalyze();
+    case "editBtn": { const open = $("editBox").classList.toggle("hidden") === false; b.setAttribute("aria-expanded", String(open)); if (open) $("eUnits").focus(); return; }
+    case "restartBtn": return resetAll();
+    case "editGo": {
+      const u = +$("eUnits").value;
+      if (!(u >= 1 && u <= 20000)){ $("editE").textContent = t("eUnitsRange"); return; }
+      const l = $("eLoad").value.trim();
+      if (l && !(+l >= 0.5 && +l <= 100)){ $("editE").textContent = t("eLoad"); return; }
+      S.unitsOverride = u; S.extra = {};
+      if (+l > 0) S.extra.sanctioned_load_kw = +l;
+      if ($("eTariff") && +$("eTariff").value > 0) S.extra.flat_tariff = +$("eTariff").value;
+      S.kw = null; b.disabled = true; return reanalyze();
+    }
+    case "chgLoc": { const open = $("chgBox").classList.toggle("hidden") === false; b.setAttribute("aria-expanded", String(open)); return open && $("chgIn").focus(); }
+    case "chgGo": return changeLocation();
+    case "useGps": return rerunLocation({ prefer:"gps" });
+  }
+});
+$("report").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (e.target.id === "chgIn"){ e.preventDefault(); changeLocation(); }
+  if (e.target.id === "eUnits" || e.target.id === "eLoad" || e.target.id === "eTariff"){ e.preventDefault(); $("editGo").click(); }
+});
+
+/* a new place means new weather: show the stages again while it runs */
+async function rerunLocation(opts){
+  if (S.busy) return;
+  S.busy = true; S.stage = [S.stage[0] || { state:"done", detail:"" }];
+  show("progress", true); show("runImg", !!S.file && S.file.type.startsWith("image/")); status("runStatus", "");
+  setStage(1, "active", t("pwork")); setStage(2, "wait"); setStage(3, "wait");
+  scrollToEl($("progress"));
+  try {
+    await locateAndAnalyze(opts);
+    if (S.loc && S.loc.needs_manual){ S.busy = false; setStage(1, "fail", ""); status("runStatus", t("notFound"), "err"); }
+  } catch(e){ fail(1, e); }
+}
+function changeLocation(){
+  const q = $("chgIn").value.trim(); if (!q) return;
+  return rerunLocation({ query:q });
+}
+async function reanalyze(){
+  if (S.busy) return; S.busy = true;
+  const y = window.scrollY;
+  try {
+    const body = { location: S.loc, bill: S.bill, ...S.extra };
+    if (S.unitsOverride) body.monthly_units = S.unitsOverride;
+    if (S.roofArea) body.roof_area_m2 = S.roofArea;
+    if (S.kw) body.kw_override = S.kw;
+    const r = await post("/analyze", body);
+    if (!r.ok){ status("roofStatus", t("roofTooSmall"), "err"); S.busy = false; return; }
+    S.report = r; S.busy = false; renderReport(); renderRoofLead(); window.scrollTo(0, y);
+  } catch(e){ S.busy = false; status("roofStatus", e.message, "err"); const eb = $("editE"); if (eb) eb.textContent = e.message; const g = $("editGo"); if (g) g.disabled = false; }
+}
+
+/* ====================================================================== roof (optional) */
+function renderRoofLead(){
+  if (!S.report) return;
+  $("roofLead").textContent = t("roofLead", S.report.plan.kw, Math.round(S.report.roof.needed_m2));
+}
+let map, poly, markers = [], pts = [];
+function initMap(){
+  if (map) return;
+  if (!window.L || !window.L.map){ status("roofStatus", t("mapFail"), "err"); return; }
+  const c = S.loc || { lat:28.61, lon:77.21 };
+  map = window.L.map("map").setView([c.lat, c.lon], 18);
+  window.L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom:20, maxNativeZoom:19, attribution:"Imagery © Esri" }).addTo(map);
+  poly = window.L.polygon([], { color:"#F4B942", weight:3, fillColor:"#F4B942", fillOpacity:.28 }).addTo(map);
+  map.on("click", e => { pts.push(e.latlng); redraw(); });
+}
+function redraw(){
+  markers.forEach(m => m.remove()); markers = [];
+  pts.forEach(p => markers.push(window.L.circleMarker(p, { radius:6, color:"#142B3B", fillColor:"#F4B942", fillOpacity:1, weight:2 }).addTo(map)));
+  poly.setLatLngs(pts); updateArea();
+}
+function geodesicArea(ps){
+  if (ps.length < 3) return 0;
+  const R = 6378137, d = Math.PI / 180; let a = 0;
+  for (let i = 0; i < ps.length; i++){ const p1 = ps[i], p2 = ps[(i+1) % ps.length]; a += (p2.lng - p1.lng) * d * (2 + Math.sin(p1.lat * d) + Math.sin(p2.lat * d)); }
+  return Math.abs(a * R * R / 2);
+}
+function roofAreaNow(){ const m = +$("manualArea").value; return m > 0 ? m : geodesicArea(pts); }
+function updateArea(){
+  const a = roofAreaNow(); $("areaVal").textContent = Math.round(a) + " m²";
+  const kw = Math.floor(a * 0.75 / 10 * 2) / 2; $("fitsVal").textContent = a > 0 ? t("fits", kw) : "";
+}
+$("roofDetails").addEventListener("toggle", () => { if ($("roofDetails").open){ initMap(); setTimeout(() => map && map.invalidateSize(), 120); } });
+$("manualArea").addEventListener("input", () => { fieldErr("manualArea", ""); updateArea(); });
+$("undoPt").addEventListener("click", () => { pts.pop(); map && redraw(); });
+$("clearPts").addEventListener("click", () => { pts = []; $("manualArea").value = ""; map ? redraw() : updateArea(); });
+async function findAddress(){
+  const q = $("addr").value.trim(); if (!q) return;
+  status("roofStatus", t("pwork"), "busy");
+  try { const r = await post("/locate", { query:q }); if (r.needs_manual) throw new Error(t("notFound")); if (map) map.setView([r.lat, r.lon], 19); status("roofStatus", ""); }
+  catch(e){ status("roofStatus", e.message, "err"); }
+}
+$("findAddr").addEventListener("click", findAddress);
+$("addr").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); findAddress(); } });
+$("roofGo").addEventListener("click", async () => {
+  const typed = $("manualArea").value.trim();
+  if (typed && !(+typed >= 5 && +typed <= 5000)){ fieldErr("manualArea", t("eArea")); return; }
+  const a = roofAreaNow(); if (!(a > 0)) return status("roofStatus", t("needRoof"), "err");
+  S.roofArea = Math.round(a); $("roofGo").disabled = true; status("roofStatus", t("pwork"), "busy");
+  await reanalyze(); $("roofGo").disabled = false;
+  if (!$("roofStatus").classList.contains("err")) status("roofStatus", "");
+});
+
+/* ====================================================================== quote */
+document.querySelectorAll("[data-qtab]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("[data-qtab]").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  show("qFileBox", b.dataset.qtab === "file"); show("qTextBox", b.dataset.qtab === "text");
+}));
+async function checkQuote(fd, isFile){
+  if (S.report) fd.append("recommended_kw", S.report.plan.kw);
+  status("quoteStatus", t("checking"), "busy"); $("quoteResult").innerHTML = ""; $("checkText").disabled = true;
+  try {
+    S.quote = isFile ? await upload("/quote", fd) : await call("/quote", { method:"POST", body:fd });
+    status("quoteStatus", ""); renderQuote(S.quote);
+  }
+  catch(e){ status("quoteStatus", e.message, "err"); }
+  finally { $("checkText").disabled = false; }
+}
+wireDrop("quoteDrop", "quoteFile", (file) => {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (![...OK_EXT, "txt"].includes(ext)) return status("quoteStatus", t(/heic|heif/.test(ext) ? "upErrHeic" : "upErrType"), "err");
+  if (file.size > MAX_MB * 1048576) return status("quoteStatus", t("upErrSize", (file.size / 1048576).toFixed(1)), "err");
+  const fd = new FormData(); fd.append("file", file); checkQuote(fd, true);
+});
+$("checkText").addEventListener("click", () => {
+  const txt = $("quoteText").value.trim(); if (txt.length < 10) return status("quoteStatus", t("needQuote"), "err");
+  const fd = new FormData(); fd.append("text", txt); checkQuote(fd, false);
+});
+function flagText(f){
+  const fn = f.code && TX["f_" + f.code];
+  if (fn){ const pair = fn(f.p || {})[L_()]; return { issue:pair[0], ask:pair[1] }; }
+  return { issue:f.issue, ask:f.ask_vendor };
+}
+function okText(o, i, q){
+  const c = (q.looks_good_codes || [])[i];
+  if (c && TX["o_" + c.code]) return t("o_" + c.code, c.p || {});
+  return o;
+}
+function renderQuote(q){
+  const v = q.price_verdict || "unknown", flags = q.red_flags || [];
+  const overpay = flags.map(f => f.potential_overpay).find(Boolean);
+  const isPrice = (f) => ["price_high","price_low","no_size_price"].includes(f.code);
+  const isSub = (f) => f.subsidy || (!f.code && /subsidy/i.test(f.issue) && f.severity === "high");
+  const fl = (f) => { const x = flagText(f); return `<div class="flag ${esc(f.severity)}"><div>${esc(x.issue)}</div><div class="ask"><b>${esc(t("askVendor"))}</b> ${esc(x.ask)}</div></div>`; };
+  const group = (title, list) => list.length ? `<div class="qgroup"><h3>${esc(title)}</h3>${list.map(fl).join("")}</div>` : "";
+  const price = flags.filter(isPrice), sub = flags.filter(f => !isPrice(f) && isSub(f)), rest = flags.filter(f => !isPrice(f) && !isSub(f));
+  const goods = (q.looks_good || []).map((g, i) => `<p class="ok">${esc(okText(g, i, q))}</p>`).join("");
+  const ex = q.extracted;
+  $("quoteResult").innerHTML = `
+    <div class="qhead">
+      <span class="badge ${esc(v)}">${esc(t("v_" + v))}</span>
+      ${q.price_per_kw ? `<span class="pk tnum">${rupee(q.price_per_kw)}/kW, ${esc(t("qSize", q.system_kw))}, ${rupee(q.total_price)}</span>` : ""}
+      ${q.subsidy_at_risk ? `<span class="badge risk">${esc(t("riskSub"))}</span>` : ""}
+      ${q.vendor_name ? `<span class="vn">${esc(t("qVendor", q.vendor_name))}</span>` : ""}
+      ${ex ? `<span class="vn">${esc(t("qRead"))}</span>` : ""}
+    </div>
+    ${overpay ? `<div class="overpay">${esc(t("overpay"))}: ${rupee(overpay)}</div>` : ""}
+    ${group(t("qgPrice"), price)}${group(t("qgSub"), sub)}${group(t("qgAsk"), rest)}
+    ${goods ? `<div class="qgroup"><h3>${esc(t("qgOk"))}</h3>${goods}</div>` : ""}`;
+}
+
+/* ====================================================================== chat */
+const SUGG = ["q1","q2","q4","q3"];
+function renderSuggest(){
+  const box = $("suggest"); if (!box) return;
+  box.innerHTML = S.report ? SUGG.map(k => `<button type="button" data-q="${esc(t(k))}">${esc(t(k))}</button>`).join("") : "";
+  box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("chatIn").value = b.dataset.q; $("chatForm").requestSubmit(); }));
+}
+/* plain text in, safe HTML out: paragraphs, bullet / numbered lists, **bold** */
+function fmtAnswer(text){
+  const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  const out = []; let list = null;
+  String(text || "").split(/\n/).forEach(raw => {
+    const line = raw.trim();
+    const bm = line.match(/^(?:[-*•]\s+)(.*)$/), nm = line.match(/^\d+[.)]\s+(.*)$/);
+    if (bm || nm){
+      const kind = bm ? "ul" : "ol";
+      if (!list || list.kind !== kind){ list = { kind, items:[] }; out.push(list); }
+      list.items.push(inline((bm || nm)[1]));
+    } else {
+      list = null;
+      if (line) out.push(`<p>${inline(line)}</p>`);
+    }
+  });
+  return out.map(x => typeof x === "string" ? x : `<${x.kind}>${x.items.map(i => `<li>${i}</li>`).join("")}</${x.kind}>`).join("");
+}
+function addMsg(html, who){ const d = document.createElement("div"); d.className = "msg " + who; d.innerHTML = html; $("chatlog").appendChild(d); $("chatlog").scrollTop = 1e6; return d; }
+async function ask(m){
+  const wait = addMsg(`<span class="typing" aria-label="…"><i></i><i></i><i></i></span>`, "bot");
+  const r0 = S.report;
+  const ctx = r0 ? { plan: r0.chat_context, location: { city: r0.location.city, state: r0.state, lat: r0.location.lat, lon: r0.location.lon },
+                     bill: S.bill && { discom: S.bill.discom, avg_monthly_units: S.bill.avg_monthly_units, sanctioned_load_kw: S.bill.sanctioned_load_kw }, quote: S.quote } : null;
+  try {
+    const r = await post("/chat", { message:m, session_id:S.session, lang:S.lang, context:ctx });
+    S.session = r.session_id; wait.innerHTML = fmtAnswer(r.reply);
+  } catch(err){
+    wait.classList.add("err");
+    wait.innerHTML = `<p>${esc(t("chatErr"))} ${esc(err.message)}</p><button class="btn sm ghost" type="button" style="margin-top:8px">${esc(t("retry"))}</button>`;
+    wait.querySelector("button").addEventListener("click", () => { wait.remove(); ask(m); });
+  }
+}
+$("chatForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const m = $("chatIn").value.trim(); if (!m) return;
+  $("chatIn").value = ""; addMsg(esc(m), "me");
+  ask(m);
+});
+
+/* ====================================================================== start */
+try { const l = localStorage.getItem("surya_lang"); if (l === "hi") S.lang = "hi"; } catch(e){}
+applyLang();
+call("/health").then(h => { S.health = h; renderPrivacy(); }).catch(() => {});
+/* data credits (Open-Meteo asks for attribution) are shown from the first screen, not only after a report */
+call("/policy").then(p => {
+  if (!$("credits").innerHTML) $("credits").innerHTML = (p.credits || []).map(c => `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.label)}</a>`).join(" · ");
+  if (!$("asofFoot").textContent && p.central) $("asofFoot").textContent = t("asof", p.central.as_of);
+}).catch(() => {});
+</script>
+</body>
+</html>
